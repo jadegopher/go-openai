@@ -3,7 +3,7 @@ package openai_test
 import (
 	"testing"
 
-	"github.com/sashabaranov/go-openai"
+	"github.com/jadeGopher/go-openai"
 )
 
 func TestGetAzureDeploymentByModel(t *testing.T) {
@@ -48,15 +48,17 @@ func TestGetAzureDeploymentByModel(t *testing.T) {
 	}
 
 	for _, c := range cases {
-		t.Run(c.Model, func(t *testing.T) {
-			conf := openai.DefaultAzureConfig("", "https://test.openai.azure.com/")
-			if c.AzureModelMapperFunc != nil {
-				conf.AzureModelMapperFunc = c.AzureModelMapperFunc
-			}
-			actual := conf.GetAzureDeploymentByModel(c.Model)
-			if actual != c.Expect {
-				t.Errorf("Expected %s, got %s", c.Expect, actual)
-			}
-		})
+		t.Run(
+			c.Model, func(t *testing.T) {
+				conf := openai.DefaultAzureConfig("", "https://test.openai.azure.com/")
+				if c.AzureModelMapperFunc != nil {
+					conf.AzureModelMapperFunc = c.AzureModelMapperFunc
+				}
+				actual := conf.GetAzureDeploymentByModel(c.Model)
+				if actual != c.Expect {
+					t.Errorf("Expected %s, got %s", c.Expect, actual)
+				}
+			},
+		)
 	}
 }

@@ -6,9 +6,9 @@ import (
 	"errors"
 	"testing"
 
-	utils "github.com/sashabaranov/go-openai/internal"
-	"github.com/sashabaranov/go-openai/internal/test"
-	"github.com/sashabaranov/go-openai/internal/test/checks"
+	utils "github.com/jadeGopher/go-openai/internal"
+	"github.com/jadeGopher/go-openai/internal/test"
+	"github.com/jadeGopher/go-openai/internal/test/checks"
 )
 
 var errTestUnmarshalerFailed = errors.New("test unmarshaler failed")
@@ -61,5 +61,11 @@ func TestStreamReaderReturnsErrTestErrorAccumulatorWriteFailed(t *testing.T) {
 		unmarshaler: &utils.JSONUnmarshaler{},
 	}
 	_, err := stream.Recv()
-	checks.ErrorIs(t, err, test.ErrTestErrorAccumulatorWriteFailed, "Did not return error when write failed", err.Error())
+	checks.ErrorIs(
+		t,
+		err,
+		test.ErrTestErrorAccumulatorWriteFailed,
+		"Did not return error when write failed",
+		err.Error(),
+	)
 }

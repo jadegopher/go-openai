@@ -9,7 +9,7 @@ import (
 	"net/http"
 	"strings"
 
-	utils "github.com/sashabaranov/go-openai/internal"
+	utils "github.com/jadeGopher/go-openai/internal"
 )
 
 // Client is OpenAI GPT-3 API client.
@@ -240,7 +240,8 @@ func (c *Client) fullURL(suffix string, args ...any) string {
 				azureDeploymentName = c.config.GetAzureDeploymentByModel(model)
 			}
 		}
-		return fmt.Sprintf("%s/%s/%s/%s%s?api-version=%s",
+		return fmt.Sprintf(
+			"%s/%s/%s/%s%s?api-version=%s",
 			baseURL, azureAPIPrefix, azureDeploymentsPrefix,
 			azureDeploymentName, suffix, c.config.APIVersion,
 		)

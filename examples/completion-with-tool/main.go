@@ -5,8 +5,8 @@ import (
 	"fmt"
 	"os"
 
-	"github.com/sashabaranov/go-openai"
-	"github.com/sashabaranov/go-openai/jsonschema"
+	"github.com/jadeGopher/go-openai"
+	"github.com/jadeGopher/go-openai/jsonschema"
 )
 
 func main() {
@@ -42,9 +42,12 @@ func main() {
 	dialogue := []openai.ChatCompletionMessage{
 		{Role: openai.ChatMessageRoleUser, Content: "What is the weather in Boston today?"},
 	}
-	fmt.Printf("Asking OpenAI '%v' and providing it a '%v()' function...\n",
-		dialogue[0].Content, f.Name)
-	resp, err := client.CreateChatCompletion(ctx,
+	fmt.Printf(
+		"Asking OpenAI '%v' and providing it a '%v()' function...\n",
+		dialogue[0].Content, f.Name,
+	)
+	resp, err := client.CreateChatCompletion(
+		ctx,
 		openai.ChatCompletionRequest{
 			Model:    openai.GPT4TurboPreview,
 			Messages: dialogue,
@@ -52,8 +55,10 @@ func main() {
 		},
 	)
 	if err != nil || len(resp.Choices) != 1 {
-		fmt.Printf("Completion error: err:%v len(choices):%v\n", err,
-			len(resp.Choices))
+		fmt.Printf(
+			"Completion error: err:%v len(choices):%v\n", err,
+			len(resp.Choices),
+		)
 		return
 	}
 	msg := resp.Choices[0].Message
@@ -64,17 +69,24 @@ func main() {
 
 	// simulate calling the function & responding to OpenAI
 	dialogue = append(dialogue, msg)
-	fmt.Printf("OpenAI called us back wanting to invoke our function '%v' with params '%v'\n",
-		msg.ToolCalls[0].Function.Name, msg.ToolCalls[0].Function.Arguments)
-	dialogue = append(dialogue, openai.ChatCompletionMessage{
-		Role:       openai.ChatMessageRoleTool,
-		Content:    "Sunny and 80 degrees.",
-		Name:       msg.ToolCalls[0].Function.Name,
-		ToolCallID: msg.ToolCalls[0].ID,
-	})
-	fmt.Printf("Sending OpenAI our '%v()' function's response and requesting the reply to the original question...\n",
-		f.Name)
-	resp, err = client.CreateChatCompletion(ctx,
+	fmt.Printf(
+		"OpenAI called us back wanting to invoke our function '%v' with params '%v'\n",
+		msg.ToolCalls[0].Function.Name, msg.ToolCalls[0].Function.Arguments,
+	)
+	dialogue = append(
+		dialogue, openai.ChatCompletionMessage{
+			Role:       openai.ChatMessageRoleTool,
+			Content:    "Sunny and 80 degrees.",
+			Name:       msg.ToolCalls[0].Function.Name,
+			ToolCallID: msg.ToolCalls[0].ID,
+		},
+	)
+	fmt.Printf(
+		"Sending OpenAI our '%v()' function's response and requesting the reply to the original question...\n",
+		f.Name,
+	)
+	resp, err = client.CreateChatCompletion(
+		ctx,
 		openai.ChatCompletionRequest{
 			Model:    openai.GPT4TurboPreview,
 			Messages: dialogue,
@@ -82,13 +94,17 @@ func main() {
 		},
 	)
 	if err != nil || len(resp.Choices) != 1 {
-		fmt.Printf("2nd completion error: err:%v len(choices):%v\n", err,
-			len(resp.Choices))
+		fmt.Printf(
+			"2nd completion error: err:%v len(choices):%v\n", err,
+			len(resp.Choices),
+		)
 		return
 	}
 
 	// display OpenAI's response to the original question utilizing our function
 	msg = resp.Choices[0].Message
-	fmt.Printf("OpenAI answered the original request with: %v\n",
-		msg.Content)
+	fmt.Printf(
+		"OpenAI answered the original request with: %v\n",
+		msg.Content,
+	)
 }

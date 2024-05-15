@@ -9,8 +9,8 @@ import (
 	"testing"
 	"time"
 
-	"github.com/sashabaranov/go-openai"
-	"github.com/sashabaranov/go-openai/internal/test/checks"
+	"github.com/jadeGopher/go-openai"
+	"github.com/jadeGopher/go-openai/internal/test/checks"
 )
 
 // TestEdits Tests the edits endpoint of the API using the mocked server.
@@ -62,10 +62,12 @@ func handleEditEndpoint(w http.ResponseWriter, r *http.Request) {
 	completionTokens := int(float32(len(editString))/4) * editReq.N
 	for i := 0; i < editReq.N; i++ {
 		// instruction will be hidden and only seen by OpenAI
-		res.Choices = append(res.Choices, openai.EditsChoice{
-			Text:  editReq.Input + editString,
-			Index: i,
-		})
+		res.Choices = append(
+			res.Choices, openai.EditsChoice{
+				Text:  editReq.Input + editString,
+				Index: i,
+			},
+		)
 	}
 	res.Usage = openai.Usage{
 		PromptTokens:     inputTokens,

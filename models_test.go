@@ -9,8 +9,8 @@ import (
 	"testing"
 	"time"
 
-	"github.com/sashabaranov/go-openai"
-	"github.com/sashabaranov/go-openai/internal/test/checks"
+	"github.com/jadeGopher/go-openai"
+	"github.com/jadeGopher/go-openai/internal/test/checks"
 )
 
 const testFineTuneModelID = "fine-tune-model-id"
@@ -64,9 +64,11 @@ func handleGetModelEndpoint(w http.ResponseWriter, _ *http.Request) {
 func TestGetModelReturnTimeoutError(t *testing.T) {
 	client, server, teardown := setupOpenAITestServer()
 	defer teardown()
-	server.RegisterHandler("/v1/models/text-davinci-003", func(http.ResponseWriter, *http.Request) {
-		time.Sleep(10 * time.Nanosecond)
-	})
+	server.RegisterHandler(
+		"/v1/models/text-davinci-003", func(http.ResponseWriter, *http.Request) {
+			time.Sleep(10 * time.Nanosecond)
+		},
+	)
 	ctx := context.Background()
 	ctx, cancel := context.WithTimeout(ctx, time.Nanosecond)
 	defer cancel()

@@ -12,9 +12,9 @@ import (
 	"testing"
 	"time"
 
-	"github.com/sashabaranov/go-openai"
-	"github.com/sashabaranov/go-openai/internal/test/checks"
-	"github.com/sashabaranov/go-openai/jsonschema"
+	"github.com/jadeGopher/go-openai"
+	"github.com/jadeGopher/go-openai/internal/test/checks"
+	"github.com/jadeGopher/go-openai/jsonschema"
 )
 
 const (
@@ -53,10 +53,12 @@ func TestChatCompletionsWrongModel(t *testing.T) {
 }
 
 func TestChatRequestOmitEmpty(t *testing.T) {
-	data, err := json.Marshal(openai.ChatCompletionRequest{
-		// We set model b/c it's required, so omitempty doesn't make sense
-		Model: "gpt-4",
-	})
+	data, err := json.Marshal(
+		openai.ChatCompletionRequest{
+			// We set model b/c it's required, so omitempty doesn't make sense
+			Model: "gpt-4",
+		},
+	)
 	checks.NoError(t, err)
 
 	// messages is also required so isn't omitted
@@ -84,16 +86,18 @@ func TestChatCompletions(t *testing.T) {
 	client, server, teardown := setupOpenAITestServer()
 	defer teardown()
 	server.RegisterHandler("/v1/chat/completions", handleChatCompletionEndpoint)
-	_, err := client.CreateChatCompletion(context.Background(), openai.ChatCompletionRequest{
-		MaxTokens: 5,
-		Model:     openai.GPT3Dot5Turbo,
-		Messages: []openai.ChatCompletionMessage{
-			{
-				Role:    openai.ChatMessageRoleUser,
-				Content: "Hello!",
+	_, err := client.CreateChatCompletion(
+		context.Background(), openai.ChatCompletionRequest{
+			MaxTokens: 5,
+			Model:     openai.GPT3Dot5Turbo,
+			Messages: []openai.ChatCompletionMessage{
+				{
+					Role:    openai.ChatMessageRoleUser,
+					Content: "Hello!",
+				},
 			},
 		},
-	})
+	)
 	checks.NoError(t, err, "CreateChatCompletion error")
 }
 
@@ -102,16 +106,18 @@ func TestChatCompletionsWithHeaders(t *testing.T) {
 	client, server, teardown := setupOpenAITestServer()
 	defer teardown()
 	server.RegisterHandler("/v1/chat/completions", handleChatCompletionEndpoint)
-	resp, err := client.CreateChatCompletion(context.Background(), openai.ChatCompletionRequest{
-		MaxTokens: 5,
-		Model:     openai.GPT3Dot5Turbo,
-		Messages: []openai.ChatCompletionMessage{
-			{
-				Role:    openai.ChatMessageRoleUser,
-				Content: "Hello!",
+	resp, err := client.CreateChatCompletion(
+		context.Background(), openai.ChatCompletionRequest{
+			MaxTokens: 5,
+			Model:     openai.GPT3Dot5Turbo,
+			Messages: []openai.ChatCompletionMessage{
+				{
+					Role:    openai.ChatMessageRoleUser,
+					Content: "Hello!",
+				},
 			},
 		},
-	})
+	)
 	checks.NoError(t, err, "CreateChatCompletion error")
 
 	a := resp.Header().Get(xCustomHeader)
@@ -126,16 +132,18 @@ func TestChatCompletionsWithRateLimitHeaders(t *testing.T) {
 	client, server, teardown := setupOpenAITestServer()
 	defer teardown()
 	server.RegisterHandler("/v1/chat/completions", handleChatCompletionEndpoint)
-	resp, err := client.CreateChatCompletion(context.Background(), openai.ChatCompletionRequest{
-		MaxTokens: 5,
-		Model:     openai.GPT3Dot5Turbo,
-		Messages: []openai.ChatCompletionMessage{
-			{
-				Role:    openai.ChatMessageRoleUser,
-				Content: "Hello!",
+	resp, err := client.CreateChatCompletion(
+		context.Background(), openai.ChatCompletionRequest{
+			MaxTokens: 5,
+			Model:     openai.GPT3Dot5Turbo,
+			Messages: []openai.ChatCompletionMessage{
+				{
+					Role:    openai.ChatMessageRoleUser,
+					Content: "Hello!",
+				},
 			},
 		},
-	})
+	)
 	checks.NoError(t, err, "CreateChatCompletion error")
 
 	headers := resp.GetRateLimitHeaders()
@@ -160,123 +168,147 @@ func TestChatCompletionsFunctions(t *testing.T) {
 	client, server, teardown := setupOpenAITestServer()
 	defer teardown()
 	server.RegisterHandler("/v1/chat/completions", handleChatCompletionEndpoint)
-	t.Run("bytes", func(t *testing.T) {
-		//nolint:lll
-		msg := json.RawMessage(`{"properties":{"count":{"type":"integer","description":"total number of words in sentence"},"words":{"items":{"type":"string"},"type":"array","description":"list of words in sentence"}},"type":"object","required":["count","words"]}`)
-		_, err := client.CreateChatCompletion(context.Background(), openai.ChatCompletionRequest{
-			MaxTokens: 5,
-			Model:     openai.GPT3Dot5Turbo0613,
-			Messages: []openai.ChatCompletionMessage{
-				{
-					Role:    openai.ChatMessageRoleUser,
-					Content: "Hello!",
-				},
-			},
-			Functions: []openai.FunctionDefinition{{
-				Name:       "test",
-				Parameters: &msg,
-			}},
-		})
-		checks.NoError(t, err, "CreateChatCompletion with functions error")
-	})
-	t.Run("struct", func(t *testing.T) {
-		type testMessage struct {
-			Count int      `json:"count"`
-			Words []string `json:"words"`
-		}
-		msg := testMessage{
-			Count: 2,
-			Words: []string{"hello", "world"},
-		}
-		_, err := client.CreateChatCompletion(context.Background(), openai.ChatCompletionRequest{
-			MaxTokens: 5,
-			Model:     openai.GPT3Dot5Turbo0613,
-			Messages: []openai.ChatCompletionMessage{
-				{
-					Role:    openai.ChatMessageRoleUser,
-					Content: "Hello!",
-				},
-			},
-			Functions: []openai.FunctionDefinition{{
-				Name:       "test",
-				Parameters: &msg,
-			}},
-		})
-		checks.NoError(t, err, "CreateChatCompletion with functions error")
-	})
-	t.Run("JSONSchemaDefinition", func(t *testing.T) {
-		_, err := client.CreateChatCompletion(context.Background(), openai.ChatCompletionRequest{
-			MaxTokens: 5,
-			Model:     openai.GPT3Dot5Turbo0613,
-			Messages: []openai.ChatCompletionMessage{
-				{
-					Role:    openai.ChatMessageRoleUser,
-					Content: "Hello!",
-				},
-			},
-			Functions: []openai.FunctionDefinition{{
-				Name: "test",
-				Parameters: &jsonschema.Definition{
-					Type: jsonschema.Object,
-					Properties: map[string]jsonschema.Definition{
-						"count": {
-							Type:        jsonschema.Number,
-							Description: "total number of words in sentence",
+	t.Run(
+		"bytes", func(t *testing.T) {
+			//nolint:lll
+			msg := json.RawMessage(`{"properties":{"count":{"type":"integer","description":"total number of words in sentence"},"words":{"items":{"type":"string"},"type":"array","description":"list of words in sentence"}},"type":"object","required":["count","words"]}`)
+			_, err := client.CreateChatCompletion(
+				context.Background(), openai.ChatCompletionRequest{
+					MaxTokens: 5,
+					Model:     openai.GPT3Dot5Turbo0613,
+					Messages: []openai.ChatCompletionMessage{
+						{
+							Role:    openai.ChatMessageRoleUser,
+							Content: "Hello!",
 						},
-						"words": {
-							Type:        jsonschema.Array,
-							Description: "list of words in sentence",
-							Items: &jsonschema.Definition{
-								Type: jsonschema.String,
-							},
-						},
-						"enumTest": {
-							Type: jsonschema.String,
-							Enum: []string{"hello", "world"},
+					},
+					Functions: []openai.FunctionDefinition{
+						{
+							Name:       "test",
+							Parameters: &msg,
 						},
 					},
 				},
-			}},
-		})
-		checks.NoError(t, err, "CreateChatCompletion with functions error")
-	})
-	t.Run("JSONSchemaDefinitionWithFunctionDefine", func(t *testing.T) {
-		// this is a compatibility check
-		_, err := client.CreateChatCompletion(context.Background(), openai.ChatCompletionRequest{
-			MaxTokens: 5,
-			Model:     openai.GPT3Dot5Turbo0613,
-			Messages: []openai.ChatCompletionMessage{
-				{
-					Role:    openai.ChatMessageRoleUser,
-					Content: "Hello!",
-				},
-			},
-			Functions: []openai.FunctionDefine{{
-				Name: "test",
-				Parameters: &jsonschema.Definition{
-					Type: jsonschema.Object,
-					Properties: map[string]jsonschema.Definition{
-						"count": {
-							Type:        jsonschema.Number,
-							Description: "total number of words in sentence",
+			)
+			checks.NoError(t, err, "CreateChatCompletion with functions error")
+		},
+	)
+	t.Run(
+		"struct", func(t *testing.T) {
+			type testMessage struct {
+				Count int      `json:"count"`
+				Words []string `json:"words"`
+			}
+			msg := testMessage{
+				Count: 2,
+				Words: []string{"hello", "world"},
+			}
+			_, err := client.CreateChatCompletion(
+				context.Background(), openai.ChatCompletionRequest{
+					MaxTokens: 5,
+					Model:     openai.GPT3Dot5Turbo0613,
+					Messages: []openai.ChatCompletionMessage{
+						{
+							Role:    openai.ChatMessageRoleUser,
+							Content: "Hello!",
 						},
-						"words": {
-							Type:        jsonschema.Array,
-							Description: "list of words in sentence",
-							Items: &jsonschema.Definition{
-								Type: jsonschema.String,
-							},
-						},
-						"enumTest": {
-							Type: jsonschema.String,
-							Enum: []string{"hello", "world"},
+					},
+					Functions: []openai.FunctionDefinition{
+						{
+							Name:       "test",
+							Parameters: &msg,
 						},
 					},
 				},
-			}},
-		})
-		checks.NoError(t, err, "CreateChatCompletion with functions error")
-	})
+			)
+			checks.NoError(t, err, "CreateChatCompletion with functions error")
+		},
+	)
+	t.Run(
+		"JSONSchemaDefinition", func(t *testing.T) {
+			_, err := client.CreateChatCompletion(
+				context.Background(), openai.ChatCompletionRequest{
+					MaxTokens: 5,
+					Model:     openai.GPT3Dot5Turbo0613,
+					Messages: []openai.ChatCompletionMessage{
+						{
+							Role:    openai.ChatMessageRoleUser,
+							Content: "Hello!",
+						},
+					},
+					Functions: []openai.FunctionDefinition{
+						{
+							Name: "test",
+							Parameters: &jsonschema.Definition{
+								Type: jsonschema.Object,
+								Properties: map[string]jsonschema.Definition{
+									"count": {
+										Type:        jsonschema.Number,
+										Description: "total number of words in sentence",
+									},
+									"words": {
+										Type:        jsonschema.Array,
+										Description: "list of words in sentence",
+										Items: &jsonschema.Definition{
+											Type: jsonschema.String,
+										},
+									},
+									"enumTest": {
+										Type: jsonschema.String,
+										Enum: []string{"hello", "world"},
+									},
+								},
+							},
+						},
+					},
+				},
+			)
+			checks.NoError(t, err, "CreateChatCompletion with functions error")
+		},
+	)
+	t.Run(
+		"JSONSchemaDefinitionWithFunctionDefine", func(t *testing.T) {
+			// this is a compatibility check
+			_, err := client.CreateChatCompletion(
+				context.Background(), openai.ChatCompletionRequest{
+					MaxTokens: 5,
+					Model:     openai.GPT3Dot5Turbo0613,
+					Messages: []openai.ChatCompletionMessage{
+						{
+							Role:    openai.ChatMessageRoleUser,
+							Content: "Hello!",
+						},
+					},
+					Functions: []openai.FunctionDefine{
+						{
+							Name: "test",
+							Parameters: &jsonschema.Definition{
+								Type: jsonschema.Object,
+								Properties: map[string]jsonschema.Definition{
+									"count": {
+										Type:        jsonschema.Number,
+										Description: "total number of words in sentence",
+									},
+									"words": {
+										Type:        jsonschema.Array,
+										Description: "list of words in sentence",
+										Items: &jsonschema.Definition{
+											Type: jsonschema.String,
+										},
+									},
+									"enumTest": {
+										Type: jsonschema.String,
+										Enum: []string{"hello", "world"},
+									},
+								},
+							},
+						},
+					},
+				},
+			)
+			checks.NoError(t, err, "CreateChatCompletion with functions error")
+		},
+	)
 }
 
 func TestAzureChatCompletions(t *testing.T) {
@@ -284,16 +316,18 @@ func TestAzureChatCompletions(t *testing.T) {
 	defer teardown()
 	server.RegisterHandler("/openai/deployments/*", handleChatCompletionEndpoint)
 
-	_, err := client.CreateChatCompletion(context.Background(), openai.ChatCompletionRequest{
-		MaxTokens: 5,
-		Model:     openai.GPT3Dot5Turbo,
-		Messages: []openai.ChatCompletionMessage{
-			{
-				Role:    openai.ChatMessageRoleUser,
-				Content: "Hello!",
+	_, err := client.CreateChatCompletion(
+		context.Background(), openai.ChatCompletionRequest{
+			MaxTokens: 5,
+			Model:     openai.GPT3Dot5Turbo,
+			Messages: []openai.ChatCompletionMessage{
+				{
+					Role:    openai.ChatMessageRoleUser,
+					Content: "Hello!",
+				},
 			},
 		},
-	})
+	)
 	checks.NoError(t, err, "CreateAzureChatCompletion error")
 }
 
@@ -302,28 +336,30 @@ func TestMultipartChatCompletions(t *testing.T) {
 	defer teardown()
 	server.RegisterHandler("/openai/deployments/*", handleChatCompletionEndpoint)
 
-	_, err := client.CreateChatCompletion(context.Background(), openai.ChatCompletionRequest{
-		MaxTokens: 5,
-		Model:     openai.GPT3Dot5Turbo,
-		Messages: []openai.ChatCompletionMessage{
-			{
-				Role: openai.ChatMessageRoleUser,
-				MultiContent: []openai.ChatMessagePart{
-					{
-						Type: openai.ChatMessagePartTypeText,
-						Text: "Hello!",
-					},
-					{
-						Type: openai.ChatMessagePartTypeImageURL,
-						ImageURL: &openai.ChatMessageImageURL{
-							URL:    "URL",
-							Detail: openai.ImageURLDetailLow,
+	_, err := client.CreateChatCompletion(
+		context.Background(), openai.ChatCompletionRequest{
+			MaxTokens: 5,
+			Model:     openai.GPT3Dot5Turbo,
+			Messages: []openai.ChatCompletionMessage{
+				{
+					Role: openai.ChatMessageRoleUser,
+					MultiContent: []openai.ChatMessagePart{
+						{
+							Type: openai.ChatMessagePartTypeText,
+							Text: "Hello!",
+						},
+						{
+							Type: openai.ChatMessagePartTypeImageURL,
+							ImageURL: &openai.ChatMessageImageURL{
+								URL:    "URL",
+								Detail: openai.ImageURLDetailLow,
+							},
 						},
 					},
 				},
 			},
 		},
-	})
+	)
 	checks.NoError(t, err, "CreateAzureChatCompletion error")
 }
 
@@ -438,29 +474,33 @@ func handleChatCompletionEndpoint(w http.ResponseWriter, r *http.Request) {
 				return
 			}
 
-			res.Choices = append(res.Choices, openai.ChatCompletionChoice{
-				Message: openai.ChatCompletionMessage{
-					Role: openai.ChatMessageRoleFunction,
-					// this is valid json so it should be fine
-					FunctionCall: &openai.FunctionCall{
-						Name:      completionReq.Functions[0].Name,
-						Arguments: string(fcb),
+			res.Choices = append(
+				res.Choices, openai.ChatCompletionChoice{
+					Message: openai.ChatCompletionMessage{
+						Role: openai.ChatMessageRoleFunction,
+						// this is valid json so it should be fine
+						FunctionCall: &openai.FunctionCall{
+							Name:      completionReq.Functions[0].Name,
+							Arguments: string(fcb),
+						},
 					},
+					Index: i,
 				},
-				Index: i,
-			})
+			)
 			continue
 		}
 		// generate a random string of length completionReq.Length
 		completionStr := strings.Repeat("a", completionReq.MaxTokens)
 
-		res.Choices = append(res.Choices, openai.ChatCompletionChoice{
-			Message: openai.ChatCompletionMessage{
-				Role:    openai.ChatMessageRoleAssistant,
-				Content: completionStr,
+		res.Choices = append(
+			res.Choices, openai.ChatCompletionChoice{
+				Message: openai.ChatCompletionMessage{
+					Role:    openai.ChatMessageRoleAssistant,
+					Content: completionStr,
+				},
+				Index: i,
 			},
-			Index: i,
-		})
+		)
 	}
 	inputTokens := numTokens(completionReq.Messages[0].Content) * n
 	completionTokens := completionReq.MaxTokens * n

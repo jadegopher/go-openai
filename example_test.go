@@ -11,7 +11,7 @@ import (
 	"net/url"
 	"os"
 
-	"github.com/sashabaranov/go-openai"
+	"github.com/jadeGopher/go-openai"
 )
 
 func Example() {
@@ -261,7 +261,8 @@ func ExampleClientConfig_clientWithProxy() {
 
 	client := openai.NewClientWithConfig(config)
 
-	client.CreateChatCompletion( //nolint:errcheck // outside of the scope of this example.
+	client.CreateChatCompletion(
+		//nolint:errcheck // outside of the scope of this example.
 		context.Background(),
 		openai.ChatCompletionRequest{
 			// etc...
@@ -286,10 +287,12 @@ func Example_chatbot() {
 	fmt.Print("> ")
 	s := bufio.NewScanner(os.Stdin)
 	for s.Scan() {
-		req.Messages = append(req.Messages, openai.ChatCompletionMessage{
-			Role:    openai.ChatMessageRoleUser,
-			Content: s.Text(),
-		})
+		req.Messages = append(
+			req.Messages, openai.ChatCompletionMessage{
+				Role:    openai.ChatMessageRoleUser,
+				Content: s.Text(),
+			},
+		)
 		resp, err := client.CreateChatCompletion(context.Background(), req)
 		if err != nil {
 			fmt.Printf("ChatCompletion error: %v\n", err)

@@ -8,8 +8,8 @@ import (
 	"path/filepath"
 	"testing"
 
-	"github.com/sashabaranov/go-openai/internal/test"
-	"github.com/sashabaranov/go-openai/internal/test/checks"
+	"github.com/jadeGopher/go-openai/internal/test"
+	"github.com/jadeGopher/go-openai/internal/test/checks"
 )
 
 func TestAudioWithFailingFormBuilder(t *testing.T) {
@@ -62,52 +62,68 @@ func TestAudioWithFailingFormBuilder(t *testing.T) {
 }
 
 func TestCreateFileField(t *testing.T) {
-	t.Run("createFileField failing file", func(t *testing.T) {
-		dir, cleanup := test.CreateTestDirectory(t)
-		defer cleanup()
-		path := filepath.Join(dir, "fake.mp3")
-		test.CreateTestFile(t, path)
+	t.Run(
+		"createFileField failing file", func(t *testing.T) {
+			dir, cleanup := test.CreateTestDirectory(t)
+			defer cleanup()
+			path := filepath.Join(dir, "fake.mp3")
+			test.CreateTestFile(t, path)
 
-		req := AudioRequest{
-			FilePath: path,
-		}
+			req := AudioRequest{
+				FilePath: path,
+			}
 
-		mockFailedErr := fmt.Errorf("mock form builder fail")
-		mockBuilder := &mockFormBuilder{
-			mockCreateFormFile: func(string, *os.File) error {
-				return mockFailedErr
-			},
-		}
+			mockFailedErr := fmt.Errorf("mock form builder fail")
+			mockBuilder := &mockFormBuilder{
+				mockCreateFormFile: func(string, *os.File) error {
+					return mockFailedErr
+				},
+			}
 
-		err := createFileField(req, mockBuilder)
-		checks.ErrorIs(t, err, mockFailedErr, "createFileField using a file should return error if form builder fails")
-	})
+			err := createFileField(req, mockBuilder)
+			checks.ErrorIs(
+				t,
+				err,
+				mockFailedErr,
+				"createFileField using a file should return error if form builder fails",
+			)
+		},
+	)
 
-	t.Run("createFileField failing reader", func(t *testing.T) {
-		req := AudioRequest{
-			FilePath: "test.wav",
-			Reader:   bytes.NewBuffer([]byte(`wav test contents`)),
-		}
+	t.Run(
+		"createFileField failing reader", func(t *testing.T) {
+			req := AudioRequest{
+				FilePath: "test.wav",
+				Reader:   bytes.NewBuffer([]byte(`wav test contents`)),
+			}
 
-		mockFailedErr := fmt.Errorf("mock form builder fail")
-		mockBuilder := &mockFormBuilder{
-			mockCreateFormFileReader: func(string, io.Reader, string) error {
-				return mockFailedErr
-			},
-		}
+			mockFailedErr := fmt.Errorf("mock form builder fail")
+			mockBuilder := &mockFormBuilder{
+				mockCreateFormFileReader: func(string, io.Reader, string) error {
+					return mockFailedErr
+				},
+			}
 
-		err := createFileField(req, mockBuilder)
-		checks.ErrorIs(t, err, mockFailedErr, "createFileField using a reader should return error if form builder fails")
-	})
+			err := createFileField(req, mockBuilder)
+			checks.ErrorIs(
+				t,
+				err,
+				mockFailedErr,
+				"createFileField using a reader should return error if form builder fails",
+			)
+		},
+	)
 
-	t.Run("createFileField failing open", func(t *testing.T) {
-		req := AudioRequest{
-			FilePath: "non_existing_file.wav",
-		}
+	t.Run(
+		"createFileField failing open", func(t *testing.T) {
+			req := AudioRequest{
+				FilePath: "non_existing_file.wav",
+			}
 
-		mockBuilder := &mockFormBuilder{}
+			mockBuilder := &mockFormBuilder{}
 
-		err := createFileField(req, mockBuilder)
-		checks.HasError(t, err, "createFileField using file should return error when open file fails")
-	})
+			err := createFileField(req, mockBuilder)
+			checks.HasError(t, err, "createFileField using file should return error when open file fails")
+		},
+	)
 }

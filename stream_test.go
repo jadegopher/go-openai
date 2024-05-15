@@ -10,8 +10,8 @@ import (
 	"testing"
 	"time"
 
-	"github.com/sashabaranov/go-openai"
-	"github.com/sashabaranov/go-openai/internal/test/checks"
+	"github.com/jadeGopher/go-openai"
+	"github.com/jadeGopher/go-openai/internal/test/checks"
 )
 
 func TestCompletionsStreamWrongModel(t *testing.T) {
@@ -34,34 +34,38 @@ func TestCompletionsStreamWrongModel(t *testing.T) {
 func TestCreateCompletionStream(t *testing.T) {
 	client, server, teardown := setupOpenAITestServer()
 	defer teardown()
-	server.RegisterHandler("/v1/completions", func(w http.ResponseWriter, _ *http.Request) {
-		w.Header().Set("Content-Type", "text/event-stream")
+	server.RegisterHandler(
+		"/v1/completions", func(w http.ResponseWriter, _ *http.Request) {
+			w.Header().Set("Content-Type", "text/event-stream")
 
-		// Send test responses
-		dataBytes := []byte{}
-		dataBytes = append(dataBytes, []byte("event: message\n")...)
-		//nolint:lll
-		data := `{"id":"1","object":"completion","created":1598069254,"model":"text-davinci-002","choices":[{"text":"response1","finish_reason":"max_tokens"}]}`
-		dataBytes = append(dataBytes, []byte("data: "+data+"\n\n")...)
+			// Send test responses
+			dataBytes := []byte{}
+			dataBytes = append(dataBytes, []byte("event: message\n")...)
+			//nolint:lll
+			data := `{"id":"1","object":"completion","created":1598069254,"model":"text-davinci-002","choices":[{"text":"response1","finish_reason":"max_tokens"}]}`
+			dataBytes = append(dataBytes, []byte("data: "+data+"\n\n")...)
 
-		dataBytes = append(dataBytes, []byte("event: message\n")...)
-		//nolint:lll
-		data = `{"id":"2","object":"completion","created":1598069255,"model":"text-davinci-002","choices":[{"text":"response2","finish_reason":"max_tokens"}]}`
-		dataBytes = append(dataBytes, []byte("data: "+data+"\n\n")...)
+			dataBytes = append(dataBytes, []byte("event: message\n")...)
+			//nolint:lll
+			data = `{"id":"2","object":"completion","created":1598069255,"model":"text-davinci-002","choices":[{"text":"response2","finish_reason":"max_tokens"}]}`
+			dataBytes = append(dataBytes, []byte("data: "+data+"\n\n")...)
 
-		dataBytes = append(dataBytes, []byte("event: done\n")...)
-		dataBytes = append(dataBytes, []byte("data: [DONE]\n\n")...)
+			dataBytes = append(dataBytes, []byte("event: done\n")...)
+			dataBytes = append(dataBytes, []byte("data: [DONE]\n\n")...)
 
-		_, err := w.Write(dataBytes)
-		checks.NoError(t, err, "Write error")
-	})
+			_, err := w.Write(dataBytes)
+			checks.NoError(t, err, "Write error")
+		},
+	)
 
-	stream, err := client.CreateCompletionStream(context.Background(), openai.CompletionRequest{
-		Prompt:    "Ex falso quodlibet",
-		Model:     "text-davinci-002",
-		MaxTokens: 10,
-		Stream:    true,
-	})
+	stream, err := client.CreateCompletionStream(
+		context.Background(), openai.CompletionRequest{
+			Prompt:    "Ex falso quodlibet",
+			Model:     "text-davinci-002",
+			MaxTokens: 10,
+			Stream:    true,
+		},
+	)
 	checks.NoError(t, err, "CreateCompletionStream returned error")
 	defer stream.Close()
 
@@ -106,35 +110,39 @@ func TestCreateCompletionStream(t *testing.T) {
 func TestCreateCompletionStreamError(t *testing.T) {
 	client, server, teardown := setupOpenAITestServer()
 	defer teardown()
-	server.RegisterHandler("/v1/completions", func(w http.ResponseWriter, _ *http.Request) {
-		w.Header().Set("Content-Type", "text/event-stream")
+	server.RegisterHandler(
+		"/v1/completions", func(w http.ResponseWriter, _ *http.Request) {
+			w.Header().Set("Content-Type", "text/event-stream")
 
-		// Send test responses
-		dataBytes := []byte{}
-		dataStr := []string{
-			`{`,
-			`"error": {`,
-			`"message": "Incorrect API key provided: sk-***************************************",`,
-			`"type": "invalid_request_error",`,
-			`"param": null,`,
-			`"code": "invalid_api_key"`,
-			`}`,
-			`}`,
-		}
-		for _, str := range dataStr {
-			dataBytes = append(dataBytes, []byte(str+"\n")...)
-		}
+			// Send test responses
+			dataBytes := []byte{}
+			dataStr := []string{
+				`{`,
+				`"error": {`,
+				`"message": "Incorrect API key provided: sk-***************************************",`,
+				`"type": "invalid_request_error",`,
+				`"param": null,`,
+				`"code": "invalid_api_key"`,
+				`}`,
+				`}`,
+			}
+			for _, str := range dataStr {
+				dataBytes = append(dataBytes, []byte(str+"\n")...)
+			}
 
-		_, err := w.Write(dataBytes)
-		checks.NoError(t, err, "Write error")
-	})
+			_, err := w.Write(dataBytes)
+			checks.NoError(t, err, "Write error")
+		},
+	)
 
-	stream, err := client.CreateCompletionStream(context.Background(), openai.CompletionRequest{
-		MaxTokens: 5,
-		Model:     openai.GPT3TextDavinci003,
-		Prompt:    "Hello!",
-		Stream:    true,
-	})
+	stream, err := client.CreateCompletionStream(
+		context.Background(), openai.CompletionRequest{
+			MaxTokens: 5,
+			Model:     openai.GPT3TextDavinci003,
+			Prompt:    "Hello!",
+			Stream:    true,
+		},
+	)
 	checks.NoError(t, err, "CreateCompletionStream returned error")
 	defer stream.Close()
 
@@ -151,28 +159,32 @@ func TestCreateCompletionStreamError(t *testing.T) {
 func TestCreateCompletionStreamRateLimitError(t *testing.T) {
 	client, server, teardown := setupOpenAITestServer()
 	defer teardown()
-	server.RegisterHandler("/v1/completions", func(w http.ResponseWriter, _ *http.Request) {
-		w.Header().Set("Content-Type", "application/json")
-		w.WriteHeader(429)
+	server.RegisterHandler(
+		"/v1/completions", func(w http.ResponseWriter, _ *http.Request) {
+			w.Header().Set("Content-Type", "application/json")
+			w.WriteHeader(429)
 
-		// Send test responses
-		dataBytes := []byte(`{"error":{` +
-			`"message": "You are sending requests too quickly.",` +
-			`"type":"rate_limit_reached",` +
-			`"param":null,` +
-			`"code":"rate_limit_reached"}}`)
+			// Send test responses
+			dataBytes := []byte(`{"error":{` +
+				`"message": "You are sending requests too quickly.",` +
+				`"type":"rate_limit_reached",` +
+				`"param":null,` +
+				`"code":"rate_limit_reached"}}`)
 
-		_, err := w.Write(dataBytes)
-		checks.NoError(t, err, "Write error")
-	})
+			_, err := w.Write(dataBytes)
+			checks.NoError(t, err, "Write error")
+		},
+	)
 
 	var apiErr *openai.APIError
-	_, err := client.CreateCompletionStream(context.Background(), openai.CompletionRequest{
-		MaxTokens: 5,
-		Model:     openai.GPT3Ada,
-		Prompt:    "Hello!",
-		Stream:    true,
-	})
+	_, err := client.CreateCompletionStream(
+		context.Background(), openai.CompletionRequest{
+			MaxTokens: 5,
+			Model:     openai.GPT3Ada,
+			Prompt:    "Hello!",
+			Stream:    true,
+		},
+	)
 	if !errors.As(err, &apiErr) {
 		t.Errorf("TestCreateCompletionStreamRateLimitError did not return APIError")
 	}
@@ -182,39 +194,43 @@ func TestCreateCompletionStreamRateLimitError(t *testing.T) {
 func TestCreateCompletionStreamTooManyEmptyStreamMessagesError(t *testing.T) {
 	client, server, teardown := setupOpenAITestServer()
 	defer teardown()
-	server.RegisterHandler("/v1/completions", func(w http.ResponseWriter, _ *http.Request) {
-		w.Header().Set("Content-Type", "text/event-stream")
+	server.RegisterHandler(
+		"/v1/completions", func(w http.ResponseWriter, _ *http.Request) {
+			w.Header().Set("Content-Type", "text/event-stream")
 
-		// Send test responses
-		dataBytes := []byte{}
-		dataBytes = append(dataBytes, []byte("event: message\n")...)
-		//nolint:lll
-		data := `{"id":"1","object":"completion","created":1598069254,"model":"text-davinci-002","choices":[{"text":"response1","finish_reason":"max_tokens"}]}`
-		dataBytes = append(dataBytes, []byte("data: "+data+"\n\n")...)
+			// Send test responses
+			dataBytes := []byte{}
+			dataBytes = append(dataBytes, []byte("event: message\n")...)
+			//nolint:lll
+			data := `{"id":"1","object":"completion","created":1598069254,"model":"text-davinci-002","choices":[{"text":"response1","finish_reason":"max_tokens"}]}`
+			dataBytes = append(dataBytes, []byte("data: "+data+"\n\n")...)
 
-		// Totally 301 empty messages (300 is the limit)
-		for i := 0; i < 299; i++ {
-			dataBytes = append(dataBytes, '\n')
-		}
+			// Totally 301 empty messages (300 is the limit)
+			for i := 0; i < 299; i++ {
+				dataBytes = append(dataBytes, '\n')
+			}
 
-		dataBytes = append(dataBytes, []byte("event: message\n")...)
-		//nolint:lll
-		data = `{"id":"2","object":"completion","created":1598069255,"model":"text-davinci-002","choices":[{"text":"response2","finish_reason":"max_tokens"}]}`
-		dataBytes = append(dataBytes, []byte("data: "+data+"\n\n")...)
+			dataBytes = append(dataBytes, []byte("event: message\n")...)
+			//nolint:lll
+			data = `{"id":"2","object":"completion","created":1598069255,"model":"text-davinci-002","choices":[{"text":"response2","finish_reason":"max_tokens"}]}`
+			dataBytes = append(dataBytes, []byte("data: "+data+"\n\n")...)
 
-		dataBytes = append(dataBytes, []byte("event: done\n")...)
-		dataBytes = append(dataBytes, []byte("data: [DONE]\n\n")...)
+			dataBytes = append(dataBytes, []byte("event: done\n")...)
+			dataBytes = append(dataBytes, []byte("data: [DONE]\n\n")...)
 
-		_, err := w.Write(dataBytes)
-		checks.NoError(t, err, "Write error")
-	})
+			_, err := w.Write(dataBytes)
+			checks.NoError(t, err, "Write error")
+		},
+	)
 
-	stream, err := client.CreateCompletionStream(context.Background(), openai.CompletionRequest{
-		Prompt:    "Ex falso quodlibet",
-		Model:     "text-davinci-002",
-		MaxTokens: 10,
-		Stream:    true,
-	})
+	stream, err := client.CreateCompletionStream(
+		context.Background(), openai.CompletionRequest{
+			Prompt:    "Ex falso quodlibet",
+			Model:     "text-davinci-002",
+			MaxTokens: 10,
+			Stream:    true,
+		},
+	)
 	checks.NoError(t, err, "CreateCompletionStream returned error")
 	defer stream.Close()
 
@@ -228,28 +244,32 @@ func TestCreateCompletionStreamTooManyEmptyStreamMessagesError(t *testing.T) {
 func TestCreateCompletionStreamUnexpectedTerminatedError(t *testing.T) {
 	client, server, teardown := setupOpenAITestServer()
 	defer teardown()
-	server.RegisterHandler("/v1/completions", func(w http.ResponseWriter, _ *http.Request) {
-		w.Header().Set("Content-Type", "text/event-stream")
+	server.RegisterHandler(
+		"/v1/completions", func(w http.ResponseWriter, _ *http.Request) {
+			w.Header().Set("Content-Type", "text/event-stream")
 
-		// Send test responses
-		dataBytes := []byte{}
-		dataBytes = append(dataBytes, []byte("event: message\n")...)
-		//nolint:lll
-		data := `{"id":"1","object":"completion","created":1598069254,"model":"text-davinci-002","choices":[{"text":"response1","finish_reason":"max_tokens"}]}`
-		dataBytes = append(dataBytes, []byte("data: "+data+"\n\n")...)
+			// Send test responses
+			dataBytes := []byte{}
+			dataBytes = append(dataBytes, []byte("event: message\n")...)
+			//nolint:lll
+			data := `{"id":"1","object":"completion","created":1598069254,"model":"text-davinci-002","choices":[{"text":"response1","finish_reason":"max_tokens"}]}`
+			dataBytes = append(dataBytes, []byte("data: "+data+"\n\n")...)
 
-		// Stream is terminated without sending "done" message
+			// Stream is terminated without sending "done" message
 
-		_, err := w.Write(dataBytes)
-		checks.NoError(t, err, "Write error")
-	})
+			_, err := w.Write(dataBytes)
+			checks.NoError(t, err, "Write error")
+		},
+	)
 
-	stream, err := client.CreateCompletionStream(context.Background(), openai.CompletionRequest{
-		Prompt:    "Ex falso quodlibet",
-		Model:     "text-davinci-002",
-		MaxTokens: 10,
-		Stream:    true,
-	})
+	stream, err := client.CreateCompletionStream(
+		context.Background(), openai.CompletionRequest{
+			Prompt:    "Ex falso quodlibet",
+			Model:     "text-davinci-002",
+			MaxTokens: 10,
+			Stream:    true,
+		},
+	)
 	checks.NoError(t, err, "CreateCompletionStream returned error")
 	defer stream.Close()
 
@@ -263,34 +283,38 @@ func TestCreateCompletionStreamUnexpectedTerminatedError(t *testing.T) {
 func TestCreateCompletionStreamBrokenJSONError(t *testing.T) {
 	client, server, teardown := setupOpenAITestServer()
 	defer teardown()
-	server.RegisterHandler("/v1/completions", func(w http.ResponseWriter, _ *http.Request) {
-		w.Header().Set("Content-Type", "text/event-stream")
+	server.RegisterHandler(
+		"/v1/completions", func(w http.ResponseWriter, _ *http.Request) {
+			w.Header().Set("Content-Type", "text/event-stream")
 
-		// Send test responses
-		dataBytes := []byte{}
-		dataBytes = append(dataBytes, []byte("event: message\n")...)
-		//nolint:lll
-		data := `{"id":"1","object":"completion","created":1598069254,"model":"text-davinci-002","choices":[{"text":"response1","finish_reason":"max_tokens"}]}`
-		dataBytes = append(dataBytes, []byte("data: "+data+"\n\n")...)
+			// Send test responses
+			dataBytes := []byte{}
+			dataBytes = append(dataBytes, []byte("event: message\n")...)
+			//nolint:lll
+			data := `{"id":"1","object":"completion","created":1598069254,"model":"text-davinci-002","choices":[{"text":"response1","finish_reason":"max_tokens"}]}`
+			dataBytes = append(dataBytes, []byte("data: "+data+"\n\n")...)
 
-		// Send broken json
-		dataBytes = append(dataBytes, []byte("event: message\n")...)
-		data = `{"id":"2","object":"completion","created":1598069255,"model":`
-		dataBytes = append(dataBytes, []byte("data: "+data+"\n\n")...)
+			// Send broken json
+			dataBytes = append(dataBytes, []byte("event: message\n")...)
+			data = `{"id":"2","object":"completion","created":1598069255,"model":`
+			dataBytes = append(dataBytes, []byte("data: "+data+"\n\n")...)
 
-		dataBytes = append(dataBytes, []byte("event: done\n")...)
-		dataBytes = append(dataBytes, []byte("data: [DONE]\n\n")...)
+			dataBytes = append(dataBytes, []byte("event: done\n")...)
+			dataBytes = append(dataBytes, []byte("data: [DONE]\n\n")...)
 
-		_, err := w.Write(dataBytes)
-		checks.NoError(t, err, "Write error")
-	})
+			_, err := w.Write(dataBytes)
+			checks.NoError(t, err, "Write error")
+		},
+	)
 
-	stream, err := client.CreateCompletionStream(context.Background(), openai.CompletionRequest{
-		Prompt:    "Ex falso quodlibet",
-		Model:     "text-davinci-002",
-		MaxTokens: 10,
-		Stream:    true,
-	})
+	stream, err := client.CreateCompletionStream(
+		context.Background(), openai.CompletionRequest{
+			Prompt:    "Ex falso quodlibet",
+			Model:     "text-davinci-002",
+			MaxTokens: 10,
+			Stream:    true,
+		},
+	)
 	checks.NoError(t, err, "CreateCompletionStream returned error")
 	defer stream.Close()
 
@@ -305,19 +329,23 @@ func TestCreateCompletionStreamBrokenJSONError(t *testing.T) {
 func TestCreateCompletionStreamReturnTimeoutError(t *testing.T) {
 	client, server, teardown := setupOpenAITestServer()
 	defer teardown()
-	server.RegisterHandler("/v1/completions", func(http.ResponseWriter, *http.Request) {
-		time.Sleep(10 * time.Nanosecond)
-	})
+	server.RegisterHandler(
+		"/v1/completions", func(http.ResponseWriter, *http.Request) {
+			time.Sleep(10 * time.Nanosecond)
+		},
+	)
 	ctx := context.Background()
 	ctx, cancel := context.WithTimeout(ctx, time.Nanosecond)
 	defer cancel()
 
-	_, err := client.CreateCompletionStream(ctx, openai.CompletionRequest{
-		Prompt:    "Ex falso quodlibet",
-		Model:     "text-davinci-002",
-		MaxTokens: 10,
-		Stream:    true,
-	})
+	_, err := client.CreateCompletionStream(
+		ctx, openai.CompletionRequest{
+			Prompt:    "Ex falso quodlibet",
+			Model:     "text-davinci-002",
+			MaxTokens: 10,
+			Stream:    true,
+		},
+	)
 	if err == nil {
 		t.Fatal("Did not return error")
 	}

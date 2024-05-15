@@ -11,8 +11,8 @@ import (
 	"testing"
 	"time"
 
-	"github.com/sashabaranov/go-openai"
-	"github.com/sashabaranov/go-openai/internal/test/checks"
+	"github.com/jadeGopher/go-openai"
+	"github.com/jadeGopher/go-openai/internal/test/checks"
 )
 
 // TestModeration Tests the moderations endpoint of the API using the mocked server.
@@ -20,10 +20,12 @@ func TestModerations(t *testing.T) {
 	client, server, teardown := setupOpenAITestServer()
 	defer teardown()
 	server.RegisterHandler("/v1/moderations", handleModerationEndpoint)
-	_, err := client.Moderations(context.Background(), openai.ModerationRequest{
-		Model: openai.ModerationTextStable,
-		Input: "I want to kill them.",
-	})
+	_, err := client.Moderations(
+		context.Background(), openai.ModerationRequest{
+			Model: openai.ModerationTextStable,
+			Input: "I want to kill them.",
+		},
+	)
 	checks.NoError(t, err, "Moderation error")
 }
 
@@ -33,7 +35,8 @@ func TestModerationsWithDifferentModelOptions(t *testing.T) {
 		model  string
 		expect error
 	}
-	modelOptions = append(modelOptions,
+	modelOptions = append(
+		modelOptions,
 		getModerationModelTestOption(openai.GPT3Dot5Turbo, openai.ErrModerationInvalidModel),
 		getModerationModelTestOption(openai.ModerationTextStable, nil),
 		getModerationModelTestOption(openai.ModerationTextLatest, nil),
@@ -43,12 +46,16 @@ func TestModerationsWithDifferentModelOptions(t *testing.T) {
 	defer teardown()
 	server.RegisterHandler("/v1/moderations", handleModerationEndpoint)
 	for _, modelTest := range modelOptions {
-		_, err := client.Moderations(context.Background(), openai.ModerationRequest{
-			Model: modelTest.model,
-			Input: "I want to kill them.",
-		})
-		checks.ErrorIs(t, err, modelTest.expect,
-			fmt.Sprintf("Moderations(..) expects err: %v, actual err:%v", modelTest.expect, err))
+		_, err := client.Moderations(
+			context.Background(), openai.ModerationRequest{
+				Model: modelTest.model,
+				Input: "I want to kill them.",
+			},
+		)
+		checks.ErrorIs(
+			t, err, modelTest.expect,
+			fmt.Sprintf("Moderations(..) expects err: %v, actual err:%v", modelTest.expect, err),
+		)
 	}
 }
 

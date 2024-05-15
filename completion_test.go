@@ -12,8 +12,8 @@ import (
 	"testing"
 	"time"
 
-	"github.com/sashabaranov/go-openai"
-	"github.com/sashabaranov/go-openai/internal/test/checks"
+	"github.com/jadeGopher/go-openai"
+	"github.com/jadeGopher/go-openai/internal/test/checks"
 )
 
 func TestCompletionsWrongModel(t *testing.T) {
@@ -93,10 +93,12 @@ func handleCompletionEndpoint(w http.ResponseWriter, r *http.Request) {
 		if completionReq.Echo {
 			completionStr = completionReq.Prompt.(string) + completionStr
 		}
-		res.Choices = append(res.Choices, openai.CompletionChoice{
-			Text:  completionStr,
-			Index: i,
-		})
+		res.Choices = append(
+			res.Choices, openai.CompletionChoice{
+				Text:  completionStr,
+				Index: i,
+			},
+		)
 	}
 	inputTokens := numTokens(completionReq.Prompt.(string)) * n
 	completionTokens := completionReq.MaxTokens * n

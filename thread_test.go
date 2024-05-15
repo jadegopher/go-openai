@@ -7,8 +7,8 @@ import (
 	"net/http"
 	"testing"
 
-	openai "github.com/sashabaranov/go-openai"
-	"github.com/sashabaranov/go-openai/internal/test/checks"
+	openai "github.com/jadeGopher/go-openai"
+	"github.com/jadeGopher/go-openai/internal/test/checks"
 )
 
 // TestThread Tests the thread endpoint of the API using the mocked server.
@@ -22,29 +22,35 @@ func TestThread(t *testing.T) {
 		func(w http.ResponseWriter, r *http.Request) {
 			switch r.Method {
 			case http.MethodGet:
-				resBytes, _ := json.Marshal(openai.Thread{
-					ID:        threadID,
-					Object:    "thread",
-					CreatedAt: 1234567890,
-				})
+				resBytes, _ := json.Marshal(
+					openai.Thread{
+						ID:        threadID,
+						Object:    "thread",
+						CreatedAt: 1234567890,
+					},
+				)
 				fmt.Fprintln(w, string(resBytes))
 			case http.MethodPost:
 				var request openai.ThreadRequest
 				err := json.NewDecoder(r.Body).Decode(&request)
 				checks.NoError(t, err, "Decode error")
 
-				resBytes, _ := json.Marshal(openai.Thread{
-					ID:        threadID,
-					Object:    "thread",
-					CreatedAt: 1234567890,
-				})
+				resBytes, _ := json.Marshal(
+					openai.Thread{
+						ID:        threadID,
+						Object:    "thread",
+						CreatedAt: 1234567890,
+					},
+				)
 				fmt.Fprintln(w, string(resBytes))
 			case http.MethodDelete:
-				fmt.Fprintln(w, `{
+				fmt.Fprintln(
+					w, `{
 					"id": "thread_abc123",
 					"object": "thread.deleted",
 					"deleted": true
-					}`)
+					}`,
+				)
 			}
 		},
 	)
@@ -57,12 +63,14 @@ func TestThread(t *testing.T) {
 				err := json.NewDecoder(r.Body).Decode(&request)
 				checks.NoError(t, err, "Decode error")
 
-				resBytes, _ := json.Marshal(openai.Thread{
-					ID:        threadID,
-					Object:    "thread",
-					CreatedAt: 1234567890,
-					Metadata:  request.Metadata,
-				})
+				resBytes, _ := json.Marshal(
+					openai.Thread{
+						ID:        threadID,
+						Object:    "thread",
+						CreatedAt: 1234567890,
+						Metadata:  request.Metadata,
+					},
+				)
 				fmt.Fprintln(w, string(resBytes))
 			}
 		},
@@ -70,24 +78,28 @@ func TestThread(t *testing.T) {
 
 	ctx := context.Background()
 
-	_, err := client.CreateThread(ctx, openai.ThreadRequest{
-		Messages: []openai.ThreadMessage{
-			{
-				Role:    openai.ThreadMessageRoleUser,
-				Content: "Hello, World!",
+	_, err := client.CreateThread(
+		ctx, openai.ThreadRequest{
+			Messages: []openai.ThreadMessage{
+				{
+					Role:    openai.ThreadMessageRoleUser,
+					Content: "Hello, World!",
+				},
 			},
 		},
-	})
+	)
 	checks.NoError(t, err, "CreateThread error")
 
 	_, err = client.RetrieveThread(ctx, threadID)
 	checks.NoError(t, err, "RetrieveThread error")
 
-	_, err = client.ModifyThread(ctx, threadID, openai.ModifyThreadRequest{
-		Metadata: map[string]interface{}{
-			"key": "value",
+	_, err = client.ModifyThread(
+		ctx, threadID, openai.ModifyThreadRequest{
+			Metadata: map[string]interface{}{
+				"key": "value",
+			},
 		},
-	})
+	)
 	checks.NoError(t, err, "ModifyThread error")
 
 	_, err = client.DeleteThread(ctx, threadID)
@@ -105,29 +117,35 @@ func TestAzureThread(t *testing.T) {
 		func(w http.ResponseWriter, r *http.Request) {
 			switch r.Method {
 			case http.MethodGet:
-				resBytes, _ := json.Marshal(openai.Thread{
-					ID:        threadID,
-					Object:    "thread",
-					CreatedAt: 1234567890,
-				})
+				resBytes, _ := json.Marshal(
+					openai.Thread{
+						ID:        threadID,
+						Object:    "thread",
+						CreatedAt: 1234567890,
+					},
+				)
 				fmt.Fprintln(w, string(resBytes))
 			case http.MethodPost:
 				var request openai.ThreadRequest
 				err := json.NewDecoder(r.Body).Decode(&request)
 				checks.NoError(t, err, "Decode error")
 
-				resBytes, _ := json.Marshal(openai.Thread{
-					ID:        threadID,
-					Object:    "thread",
-					CreatedAt: 1234567890,
-				})
+				resBytes, _ := json.Marshal(
+					openai.Thread{
+						ID:        threadID,
+						Object:    "thread",
+						CreatedAt: 1234567890,
+					},
+				)
 				fmt.Fprintln(w, string(resBytes))
 			case http.MethodDelete:
-				fmt.Fprintln(w, `{
+				fmt.Fprintln(
+					w, `{
 					"id": "thread_abc123",
 					"object": "thread.deleted",
 					"deleted": true
-					}`)
+					}`,
+				)
 			}
 		},
 	)
@@ -140,12 +158,14 @@ func TestAzureThread(t *testing.T) {
 				err := json.NewDecoder(r.Body).Decode(&request)
 				checks.NoError(t, err, "Decode error")
 
-				resBytes, _ := json.Marshal(openai.Thread{
-					ID:        threadID,
-					Object:    "thread",
-					CreatedAt: 1234567890,
-					Metadata:  request.Metadata,
-				})
+				resBytes, _ := json.Marshal(
+					openai.Thread{
+						ID:        threadID,
+						Object:    "thread",
+						CreatedAt: 1234567890,
+						Metadata:  request.Metadata,
+					},
+				)
 				fmt.Fprintln(w, string(resBytes))
 			}
 		},
@@ -153,24 +173,28 @@ func TestAzureThread(t *testing.T) {
 
 	ctx := context.Background()
 
-	_, err := client.CreateThread(ctx, openai.ThreadRequest{
-		Messages: []openai.ThreadMessage{
-			{
-				Role:    openai.ThreadMessageRoleUser,
-				Content: "Hello, World!",
+	_, err := client.CreateThread(
+		ctx, openai.ThreadRequest{
+			Messages: []openai.ThreadMessage{
+				{
+					Role:    openai.ThreadMessageRoleUser,
+					Content: "Hello, World!",
+				},
 			},
 		},
-	})
+	)
 	checks.NoError(t, err, "CreateThread error")
 
 	_, err = client.RetrieveThread(ctx, threadID)
 	checks.NoError(t, err, "RetrieveThread error")
 
-	_, err = client.ModifyThread(ctx, threadID, openai.ModifyThreadRequest{
-		Metadata: map[string]interface{}{
-			"key": "value",
+	_, err = client.ModifyThread(
+		ctx, threadID, openai.ModifyThreadRequest{
+			Metadata: map[string]interface{}{
+				"key": "value",
+			},
 		},
-	})
+	)
 	checks.NoError(t, err, "ModifyThread error")
 
 	_, err = client.DeleteThread(ctx, threadID)

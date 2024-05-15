@@ -10,8 +10,8 @@ import (
 	"strconv"
 	"testing"
 
-	"github.com/sashabaranov/go-openai"
-	"github.com/sashabaranov/go-openai/internal/test/checks"
+	"github.com/jadeGopher/go-openai"
+	"github.com/jadeGopher/go-openai/internal/test/checks"
 )
 
 func TestChatCompletionsStreamWrongModel(t *testing.T) {
@@ -39,39 +39,43 @@ func TestChatCompletionsStreamWrongModel(t *testing.T) {
 func TestCreateChatCompletionStream(t *testing.T) {
 	client, server, teardown := setupOpenAITestServer()
 	defer teardown()
-	server.RegisterHandler("/v1/chat/completions", func(w http.ResponseWriter, _ *http.Request) {
-		w.Header().Set("Content-Type", "text/event-stream")
+	server.RegisterHandler(
+		"/v1/chat/completions", func(w http.ResponseWriter, _ *http.Request) {
+			w.Header().Set("Content-Type", "text/event-stream")
 
-		// Send test responses
-		dataBytes := []byte{}
-		dataBytes = append(dataBytes, []byte("event: message\n")...)
-		//nolint:lll
-		data := `{"id":"1","object":"completion","created":1598069254,"model":"gpt-3.5-turbo","system_fingerprint": "fp_d9767fc5b9","choices":[{"index":0,"delta":{"content":"response1"},"finish_reason":"max_tokens"}]}`
-		dataBytes = append(dataBytes, []byte("data: "+data+"\n\n")...)
+			// Send test responses
+			dataBytes := []byte{}
+			dataBytes = append(dataBytes, []byte("event: message\n")...)
+			//nolint:lll
+			data := `{"id":"1","object":"completion","created":1598069254,"model":"gpt-3.5-turbo","system_fingerprint": "fp_d9767fc5b9","choices":[{"index":0,"delta":{"content":"response1"},"finish_reason":"max_tokens"}]}`
+			dataBytes = append(dataBytes, []byte("data: "+data+"\n\n")...)
 
-		dataBytes = append(dataBytes, []byte("event: message\n")...)
-		//nolint:lll
-		data = `{"id":"2","object":"completion","created":1598069255,"model":"gpt-3.5-turbo","system_fingerprint": "fp_d9767fc5b9","choices":[{"index":0,"delta":{"content":"response2"},"finish_reason":"max_tokens"}]}`
-		dataBytes = append(dataBytes, []byte("data: "+data+"\n\n")...)
+			dataBytes = append(dataBytes, []byte("event: message\n")...)
+			//nolint:lll
+			data = `{"id":"2","object":"completion","created":1598069255,"model":"gpt-3.5-turbo","system_fingerprint": "fp_d9767fc5b9","choices":[{"index":0,"delta":{"content":"response2"},"finish_reason":"max_tokens"}]}`
+			dataBytes = append(dataBytes, []byte("data: "+data+"\n\n")...)
 
-		dataBytes = append(dataBytes, []byte("event: done\n")...)
-		dataBytes = append(dataBytes, []byte("data: [DONE]\n\n")...)
+			dataBytes = append(dataBytes, []byte("event: done\n")...)
+			dataBytes = append(dataBytes, []byte("data: [DONE]\n\n")...)
 
-		_, err := w.Write(dataBytes)
-		checks.NoError(t, err, "Write error")
-	})
-
-	stream, err := client.CreateChatCompletionStream(context.Background(), openai.ChatCompletionRequest{
-		MaxTokens: 5,
-		Model:     openai.GPT3Dot5Turbo,
-		Messages: []openai.ChatCompletionMessage{
-			{
-				Role:    openai.ChatMessageRoleUser,
-				Content: "Hello!",
-			},
+			_, err := w.Write(dataBytes)
+			checks.NoError(t, err, "Write error")
 		},
-		Stream: true,
-	})
+	)
+
+	stream, err := client.CreateChatCompletionStream(
+		context.Background(), openai.ChatCompletionRequest{
+			MaxTokens: 5,
+			Model:     openai.GPT3Dot5Turbo,
+			Messages: []openai.ChatCompletionMessage{
+				{
+					Role:    openai.ChatMessageRoleUser,
+					Content: "Hello!",
+				},
+			},
+			Stream: true,
+		},
+	)
 	checks.NoError(t, err, "CreateCompletionStream returned error")
 	defer stream.Close()
 
@@ -135,40 +139,44 @@ func TestCreateChatCompletionStream(t *testing.T) {
 func TestCreateChatCompletionStreamError(t *testing.T) {
 	client, server, teardown := setupOpenAITestServer()
 	defer teardown()
-	server.RegisterHandler("/v1/chat/completions", func(w http.ResponseWriter, _ *http.Request) {
-		w.Header().Set("Content-Type", "text/event-stream")
+	server.RegisterHandler(
+		"/v1/chat/completions", func(w http.ResponseWriter, _ *http.Request) {
+			w.Header().Set("Content-Type", "text/event-stream")
 
-		// Send test responses
-		dataBytes := []byte{}
-		dataStr := []string{
-			`{`,
-			`"error": {`,
-			`"message": "Incorrect API key provided: sk-***************************************",`,
-			`"type": "invalid_request_error",`,
-			`"param": null,`,
-			`"code": "invalid_api_key"`,
-			`}`,
-			`}`,
-		}
-		for _, str := range dataStr {
-			dataBytes = append(dataBytes, []byte(str+"\n")...)
-		}
+			// Send test responses
+			dataBytes := []byte{}
+			dataStr := []string{
+				`{`,
+				`"error": {`,
+				`"message": "Incorrect API key provided: sk-***************************************",`,
+				`"type": "invalid_request_error",`,
+				`"param": null,`,
+				`"code": "invalid_api_key"`,
+				`}`,
+				`}`,
+			}
+			for _, str := range dataStr {
+				dataBytes = append(dataBytes, []byte(str+"\n")...)
+			}
 
-		_, err := w.Write(dataBytes)
-		checks.NoError(t, err, "Write error")
-	})
-
-	stream, err := client.CreateChatCompletionStream(context.Background(), openai.ChatCompletionRequest{
-		MaxTokens: 5,
-		Model:     openai.GPT3Dot5Turbo,
-		Messages: []openai.ChatCompletionMessage{
-			{
-				Role:    openai.ChatMessageRoleUser,
-				Content: "Hello!",
-			},
+			_, err := w.Write(dataBytes)
+			checks.NoError(t, err, "Write error")
 		},
-		Stream: true,
-	})
+	)
+
+	stream, err := client.CreateChatCompletionStream(
+		context.Background(), openai.ChatCompletionRequest{
+			MaxTokens: 5,
+			Model:     openai.GPT3Dot5Turbo,
+			Messages: []openai.ChatCompletionMessage{
+				{
+					Role:    openai.ChatMessageRoleUser,
+					Content: "Hello!",
+				},
+			},
+			Stream: true,
+		},
+	)
 	checks.NoError(t, err, "CreateCompletionStream returned error")
 	defer stream.Close()
 
@@ -185,30 +193,34 @@ func TestCreateChatCompletionStreamError(t *testing.T) {
 func TestCreateChatCompletionStreamWithHeaders(t *testing.T) {
 	client, server, teardown := setupOpenAITestServer()
 	defer teardown()
-	server.RegisterHandler("/v1/chat/completions", func(w http.ResponseWriter, _ *http.Request) {
-		w.Header().Set("Content-Type", "text/event-stream")
-		w.Header().Set(xCustomHeader, xCustomHeaderValue)
+	server.RegisterHandler(
+		"/v1/chat/completions", func(w http.ResponseWriter, _ *http.Request) {
+			w.Header().Set("Content-Type", "text/event-stream")
+			w.Header().Set(xCustomHeader, xCustomHeaderValue)
 
-		// Send test responses
-		//nolint:lll
-		dataBytes := []byte(`data: {"error":{"message":"The server had an error while processing your request. Sorry about that!", "type":"server_ error", "param":null,"code":null}}`)
-		dataBytes = append(dataBytes, []byte("\n\ndata: [DONE]\n\n")...)
+			// Send test responses
+			//nolint:lll
+			dataBytes := []byte(`data: {"error":{"message":"The server had an error while processing your request. Sorry about that!", "type":"server_ error", "param":null,"code":null}}`)
+			dataBytes = append(dataBytes, []byte("\n\ndata: [DONE]\n\n")...)
 
-		_, err := w.Write(dataBytes)
-		checks.NoError(t, err, "Write error")
-	})
-
-	stream, err := client.CreateChatCompletionStream(context.Background(), openai.ChatCompletionRequest{
-		MaxTokens: 5,
-		Model:     openai.GPT3Dot5Turbo,
-		Messages: []openai.ChatCompletionMessage{
-			{
-				Role:    openai.ChatMessageRoleUser,
-				Content: "Hello!",
-			},
+			_, err := w.Write(dataBytes)
+			checks.NoError(t, err, "Write error")
 		},
-		Stream: true,
-	})
+	)
+
+	stream, err := client.CreateChatCompletionStream(
+		context.Background(), openai.ChatCompletionRequest{
+			MaxTokens: 5,
+			Model:     openai.GPT3Dot5Turbo,
+			Messages: []openai.ChatCompletionMessage{
+				{
+					Role:    openai.ChatMessageRoleUser,
+					Content: "Hello!",
+				},
+			},
+			Stream: true,
+		},
+	)
 	checks.NoError(t, err, "CreateCompletionStream returned error")
 	defer stream.Close()
 
@@ -221,37 +233,41 @@ func TestCreateChatCompletionStreamWithHeaders(t *testing.T) {
 func TestCreateChatCompletionStreamWithRatelimitHeaders(t *testing.T) {
 	client, server, teardown := setupOpenAITestServer()
 	defer teardown()
-	server.RegisterHandler("/v1/chat/completions", func(w http.ResponseWriter, _ *http.Request) {
-		w.Header().Set("Content-Type", "text/event-stream")
-		for k, v := range rateLimitHeaders {
-			switch val := v.(type) {
-			case int:
-				w.Header().Set(k, strconv.Itoa(val))
-			default:
-				w.Header().Set(k, fmt.Sprintf("%s", v))
+	server.RegisterHandler(
+		"/v1/chat/completions", func(w http.ResponseWriter, _ *http.Request) {
+			w.Header().Set("Content-Type", "text/event-stream")
+			for k, v := range rateLimitHeaders {
+				switch val := v.(type) {
+				case int:
+					w.Header().Set(k, strconv.Itoa(val))
+				default:
+					w.Header().Set(k, fmt.Sprintf("%s", v))
+				}
 			}
-		}
 
-		// Send test responses
-		//nolint:lll
-		dataBytes := []byte(`data: {"error":{"message":"The server had an error while processing your request. Sorry about that!", "type":"server_ error", "param":null,"code":null}}`)
-		dataBytes = append(dataBytes, []byte("\n\ndata: [DONE]\n\n")...)
+			// Send test responses
+			//nolint:lll
+			dataBytes := []byte(`data: {"error":{"message":"The server had an error while processing your request. Sorry about that!", "type":"server_ error", "param":null,"code":null}}`)
+			dataBytes = append(dataBytes, []byte("\n\ndata: [DONE]\n\n")...)
 
-		_, err := w.Write(dataBytes)
-		checks.NoError(t, err, "Write error")
-	})
-
-	stream, err := client.CreateChatCompletionStream(context.Background(), openai.ChatCompletionRequest{
-		MaxTokens: 5,
-		Model:     openai.GPT3Dot5Turbo,
-		Messages: []openai.ChatCompletionMessage{
-			{
-				Role:    openai.ChatMessageRoleUser,
-				Content: "Hello!",
-			},
+			_, err := w.Write(dataBytes)
+			checks.NoError(t, err, "Write error")
 		},
-		Stream: true,
-	})
+	)
+
+	stream, err := client.CreateChatCompletionStream(
+		context.Background(), openai.ChatCompletionRequest{
+			MaxTokens: 5,
+			Model:     openai.GPT3Dot5Turbo,
+			Messages: []openai.ChatCompletionMessage{
+				{
+					Role:    openai.ChatMessageRoleUser,
+					Content: "Hello!",
+				},
+			},
+			Stream: true,
+		},
+	)
 	checks.NoError(t, err, "CreateCompletionStream returned error")
 	defer stream.Close()
 
@@ -266,29 +282,33 @@ func TestCreateChatCompletionStreamWithRatelimitHeaders(t *testing.T) {
 func TestCreateChatCompletionStreamErrorWithDataPrefix(t *testing.T) {
 	client, server, teardown := setupOpenAITestServer()
 	defer teardown()
-	server.RegisterHandler("/v1/chat/completions", func(w http.ResponseWriter, _ *http.Request) {
-		w.Header().Set("Content-Type", "text/event-stream")
+	server.RegisterHandler(
+		"/v1/chat/completions", func(w http.ResponseWriter, _ *http.Request) {
+			w.Header().Set("Content-Type", "text/event-stream")
 
-		// Send test responses
-		//nolint:lll
-		dataBytes := []byte(`data: {"error":{"message":"The server had an error while processing your request. Sorry about that!", "type":"server_ error", "param":null,"code":null}}`)
-		dataBytes = append(dataBytes, []byte("\n\ndata: [DONE]\n\n")...)
+			// Send test responses
+			//nolint:lll
+			dataBytes := []byte(`data: {"error":{"message":"The server had an error while processing your request. Sorry about that!", "type":"server_ error", "param":null,"code":null}}`)
+			dataBytes = append(dataBytes, []byte("\n\ndata: [DONE]\n\n")...)
 
-		_, err := w.Write(dataBytes)
-		checks.NoError(t, err, "Write error")
-	})
-
-	stream, err := client.CreateChatCompletionStream(context.Background(), openai.ChatCompletionRequest{
-		MaxTokens: 5,
-		Model:     openai.GPT3Dot5Turbo,
-		Messages: []openai.ChatCompletionMessage{
-			{
-				Role:    openai.ChatMessageRoleUser,
-				Content: "Hello!",
-			},
+			_, err := w.Write(dataBytes)
+			checks.NoError(t, err, "Write error")
 		},
-		Stream: true,
-	})
+	)
+
+	stream, err := client.CreateChatCompletionStream(
+		context.Background(), openai.ChatCompletionRequest{
+			MaxTokens: 5,
+			Model:     openai.GPT3Dot5Turbo,
+			Messages: []openai.ChatCompletionMessage{
+				{
+					Role:    openai.ChatMessageRoleUser,
+					Content: "Hello!",
+				},
+			},
+			Stream: true,
+		},
+	)
 	checks.NoError(t, err, "CreateCompletionStream returned error")
 	defer stream.Close()
 
@@ -305,31 +325,35 @@ func TestCreateChatCompletionStreamErrorWithDataPrefix(t *testing.T) {
 func TestCreateChatCompletionStreamRateLimitError(t *testing.T) {
 	client, server, teardown := setupOpenAITestServer()
 	defer teardown()
-	server.RegisterHandler("/v1/chat/completions", func(w http.ResponseWriter, _ *http.Request) {
-		w.Header().Set("Content-Type", "application/json")
-		w.WriteHeader(429)
+	server.RegisterHandler(
+		"/v1/chat/completions", func(w http.ResponseWriter, _ *http.Request) {
+			w.Header().Set("Content-Type", "application/json")
+			w.WriteHeader(429)
 
-		// Send test responses
-		dataBytes := []byte(`{"error":{` +
-			`"message": "You are sending requests too quickly.",` +
-			`"type":"rate_limit_reached",` +
-			`"param":null,` +
-			`"code":"rate_limit_reached"}}`)
+			// Send test responses
+			dataBytes := []byte(`{"error":{` +
+				`"message": "You are sending requests too quickly.",` +
+				`"type":"rate_limit_reached",` +
+				`"param":null,` +
+				`"code":"rate_limit_reached"}}`)
 
-		_, err := w.Write(dataBytes)
-		checks.NoError(t, err, "Write error")
-	})
-	_, err := client.CreateChatCompletionStream(context.Background(), openai.ChatCompletionRequest{
-		MaxTokens: 5,
-		Model:     openai.GPT3Dot5Turbo,
-		Messages: []openai.ChatCompletionMessage{
-			{
-				Role:    openai.ChatMessageRoleUser,
-				Content: "Hello!",
-			},
+			_, err := w.Write(dataBytes)
+			checks.NoError(t, err, "Write error")
 		},
-		Stream: true,
-	})
+	)
+	_, err := client.CreateChatCompletionStream(
+		context.Background(), openai.ChatCompletionRequest{
+			MaxTokens: 5,
+			Model:     openai.GPT3Dot5Turbo,
+			Messages: []openai.ChatCompletionMessage{
+				{
+					Role:    openai.ChatMessageRoleUser,
+					Content: "Hello!",
+				},
+			},
+			Stream: true,
+		},
+	)
 	var apiErr *openai.APIError
 	if !errors.As(err, &apiErr) {
 		t.Errorf("TestCreateChatCompletionStreamRateLimitError did not return APIError")
@@ -346,7 +370,8 @@ func TestAzureCreateChatCompletionStreamRateLimitError(t *testing.T) {
 
 	client, server, teardown := setupAzureTestServer()
 	defer teardown()
-	server.RegisterHandler("/openai/deployments/gpt-35-turbo/chat/completions",
+	server.RegisterHandler(
+		"/openai/deployments/gpt-35-turbo/chat/completions",
 		func(w http.ResponseWriter, _ *http.Request) {
 			w.Header().Set("Content-Type", "application/json")
 			w.WriteHeader(http.StatusTooManyRequests)
@@ -355,26 +380,33 @@ func TestAzureCreateChatCompletionStreamRateLimitError(t *testing.T) {
 			_, err := w.Write(dataBytes)
 
 			checks.NoError(t, err, "Write error")
-		})
+		},
+	)
 
 	apiErr := &openai.APIError{}
-	_, err := client.CreateChatCompletionStream(context.Background(), openai.ChatCompletionRequest{
-		MaxTokens: 5,
-		Model:     openai.GPT3Dot5Turbo,
-		Messages: []openai.ChatCompletionMessage{
-			{
-				Role:    openai.ChatMessageRoleUser,
-				Content: "Hello!",
+	_, err := client.CreateChatCompletionStream(
+		context.Background(), openai.ChatCompletionRequest{
+			MaxTokens: 5,
+			Model:     openai.GPT3Dot5Turbo,
+			Messages: []openai.ChatCompletionMessage{
+				{
+					Role:    openai.ChatMessageRoleUser,
+					Content: "Hello!",
+				},
 			},
+			Stream: true,
 		},
-		Stream: true,
-	})
+	)
 	if !errors.As(err, &apiErr) {
 		t.Errorf("Did not return APIError: %+v\n", apiErr)
 		return
 	}
 	if apiErr.HTTPStatusCode != http.StatusTooManyRequests {
-		t.Errorf("Did not return HTTPStatusCode got = %d, want = %d\n", apiErr.HTTPStatusCode, http.StatusTooManyRequests)
+		t.Errorf(
+			"Did not return HTTPStatusCode got = %d, want = %d\n",
+			apiErr.HTTPStatusCode,
+			http.StatusTooManyRequests,
+		)
 		return
 	}
 	code, ok := apiErr.Code.(string)
@@ -392,43 +424,47 @@ func TestCreateChatCompletionStreamStreamOptions(t *testing.T) {
 	client, server, teardown := setupOpenAITestServer()
 	defer teardown()
 
-	server.RegisterHandler("/v1/chat/completions", func(w http.ResponseWriter, _ *http.Request) {
-		w.Header().Set("Content-Type", "text/event-stream")
+	server.RegisterHandler(
+		"/v1/chat/completions", func(w http.ResponseWriter, _ *http.Request) {
+			w.Header().Set("Content-Type", "text/event-stream")
 
-		// Send test responses
-		var dataBytes []byte
-		//nolint:lll
-		data := `{"id":"1","object":"completion","created":1598069254,"model":"gpt-3.5-turbo","system_fingerprint": "fp_d9767fc5b9","choices":[{"index":0,"delta":{"content":"response1"},"finish_reason":"max_tokens"}],"usage":null}`
-		dataBytes = append(dataBytes, []byte("data: "+data+"\n\n")...)
+			// Send test responses
+			var dataBytes []byte
+			//nolint:lll
+			data := `{"id":"1","object":"completion","created":1598069254,"model":"gpt-3.5-turbo","system_fingerprint": "fp_d9767fc5b9","choices":[{"index":0,"delta":{"content":"response1"},"finish_reason":"max_tokens"}],"usage":null}`
+			dataBytes = append(dataBytes, []byte("data: "+data+"\n\n")...)
 
-		//nolint:lll
-		data = `{"id":"2","object":"completion","created":1598069255,"model":"gpt-3.5-turbo","system_fingerprint": "fp_d9767fc5b9","choices":[{"index":0,"delta":{"content":"response2"},"finish_reason":"max_tokens"}],"usage":null}`
-		dataBytes = append(dataBytes, []byte("data: "+data+"\n\n")...)
+			//nolint:lll
+			data = `{"id":"2","object":"completion","created":1598069255,"model":"gpt-3.5-turbo","system_fingerprint": "fp_d9767fc5b9","choices":[{"index":0,"delta":{"content":"response2"},"finish_reason":"max_tokens"}],"usage":null}`
+			dataBytes = append(dataBytes, []byte("data: "+data+"\n\n")...)
 
-		//nolint:lll
-		data = `{"id":"3","object":"completion","created":1598069256,"model":"gpt-3.5-turbo","system_fingerprint": "fp_d9767fc5b9","choices":[],"usage":{"prompt_tokens":1,"completion_tokens":1,"total_tokens":2}}`
-		dataBytes = append(dataBytes, []byte("data: "+data+"\n\n")...)
+			//nolint:lll
+			data = `{"id":"3","object":"completion","created":1598069256,"model":"gpt-3.5-turbo","system_fingerprint": "fp_d9767fc5b9","choices":[],"usage":{"prompt_tokens":1,"completion_tokens":1,"total_tokens":2}}`
+			dataBytes = append(dataBytes, []byte("data: "+data+"\n\n")...)
 
-		dataBytes = append(dataBytes, []byte("data: [DONE]\n\n")...)
+			dataBytes = append(dataBytes, []byte("data: [DONE]\n\n")...)
 
-		_, err := w.Write(dataBytes)
-		checks.NoError(t, err, "Write error")
-	})
+			_, err := w.Write(dataBytes)
+			checks.NoError(t, err, "Write error")
+		},
+	)
 
-	stream, err := client.CreateChatCompletionStream(context.Background(), openai.ChatCompletionRequest{
-		MaxTokens: 5,
-		Model:     openai.GPT3Dot5Turbo,
-		Messages: []openai.ChatCompletionMessage{
-			{
-				Role:    openai.ChatMessageRoleUser,
-				Content: "Hello!",
+	stream, err := client.CreateChatCompletionStream(
+		context.Background(), openai.ChatCompletionRequest{
+			MaxTokens: 5,
+			Model:     openai.GPT3Dot5Turbo,
+			Messages: []openai.ChatCompletionMessage{
+				{
+					Role:    openai.ChatMessageRoleUser,
+					Content: "Hello!",
+				},
+			},
+			Stream: true,
+			StreamOptions: &openai.StreamOptions{
+				IncludeUsage: true,
 			},
 		},
-		Stream: true,
-		StreamOptions: &openai.StreamOptions{
-			IncludeUsage: true,
-		},
-	})
+	)
 	checks.NoError(t, err, "CreateCompletionStream returned error")
 	defer stream.Close()
 

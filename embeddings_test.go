@@ -11,8 +11,8 @@ import (
 	"reflect"
 	"testing"
 
-	"github.com/sashabaranov/go-openai"
-	"github.com/sashabaranov/go-openai/internal/test/checks"
+	"github.com/jadeGopher/go-openai"
+	"github.com/jadeGopher/go-openai/internal/test/checks"
 )
 
 func TestEmbedding(t *testing.T) {
@@ -151,10 +151,12 @@ func TestEmbeddingEndpoint(t *testing.T) {
 	}
 
 	// test failed sendRequest
-	_, err = client.CreateEmbeddings(context.Background(), openai.EmbeddingRequest{
-		User:           "invalid",
-		EncodingFormat: openai.EmbeddingEncodingFormatBase64,
-	})
+	_, err = client.CreateEmbeddings(
+		context.Background(), openai.EmbeddingRequest{
+			User:           "invalid",
+			EncodingFormat: openai.EmbeddingEncodingFormatBase64,
+		},
+	)
 	checks.HasError(t, err, "CreateEmbeddings error")
 }
 
@@ -175,9 +177,11 @@ func TestAzureEmbeddingEndpoint(t *testing.T) {
 		},
 	)
 	// test create embeddings with strings (simple embedding request)
-	res, err := client.CreateEmbeddings(context.Background(), openai.EmbeddingRequest{
-		Model: openai.AdaEmbeddingV2,
-	})
+	res, err := client.CreateEmbeddings(
+		context.Background(), openai.EmbeddingRequest{
+			Model: openai.AdaEmbeddingV2,
+		},
+	)
 	checks.NoError(t, err, "CreateEmbeddings error")
 	if !reflect.DeepEqual(res.Data, sampleEmbeddings) {
 		t.Errorf("Expected %#v embeddings, got %#v", sampleEmbeddings, res.Data)
@@ -227,22 +231,24 @@ func TestEmbeddingResponseBase64_ToEmbeddingResponse(t *testing.T) {
 		},
 	}
 	for _, tt := range tests {
-		t.Run(tt.name, func(t *testing.T) {
-			r := &openai.EmbeddingResponseBase64{
-				Object: tt.fields.Object,
-				Data:   tt.fields.Data,
-				Model:  tt.fields.Model,
-				Usage:  tt.fields.Usage,
-			}
-			got, err := r.ToEmbeddingResponse()
-			if (err != nil) != tt.wantErr {
-				t.Errorf("EmbeddingResponseBase64.ToEmbeddingResponse() error = %v, wantErr %v", err, tt.wantErr)
-				return
-			}
-			if !reflect.DeepEqual(got, tt.want) {
-				t.Errorf("EmbeddingResponseBase64.ToEmbeddingResponse() = %v, want %v", got, tt.want)
-			}
-		})
+		t.Run(
+			tt.name, func(t *testing.T) {
+				r := &openai.EmbeddingResponseBase64{
+					Object: tt.fields.Object,
+					Data:   tt.fields.Data,
+					Model:  tt.fields.Model,
+					Usage:  tt.fields.Usage,
+				}
+				got, err := r.ToEmbeddingResponse()
+				if (err != nil) != tt.wantErr {
+					t.Errorf("EmbeddingResponseBase64.ToEmbeddingResponse() error = %v, wantErr %v", err, tt.wantErr)
+					return
+				}
+				if !reflect.DeepEqual(got, tt.want) {
+					t.Errorf("EmbeddingResponseBase64.ToEmbeddingResponse() = %v, want %v", got, tt.want)
+				}
+			},
+		)
 	}
 }
 

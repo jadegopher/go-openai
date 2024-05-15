@@ -10,24 +10,26 @@ import (
 	"testing"
 	"time"
 
-	"github.com/sashabaranov/go-openai"
-	"github.com/sashabaranov/go-openai/internal/test/checks"
+	"github.com/jadeGopher/go-openai"
+	"github.com/jadeGopher/go-openai/internal/test/checks"
 )
 
 func TestImages(t *testing.T) {
 	client, server, teardown := setupOpenAITestServer()
 	defer teardown()
 	server.RegisterHandler("/v1/images/generations", handleImageEndpoint)
-	_, err := client.CreateImage(context.Background(), openai.ImageRequest{
-		Prompt:         "Lorem ipsum",
-		Model:          openai.CreateImageModelDallE3,
-		N:              1,
-		Quality:        openai.CreateImageQualityHD,
-		Size:           openai.CreateImageSize1024x1024,
-		Style:          openai.CreateImageStyleVivid,
-		ResponseFormat: openai.CreateImageResponseFormatURL,
-		User:           "user",
-	})
+	_, err := client.CreateImage(
+		context.Background(), openai.ImageRequest{
+			Prompt:         "Lorem ipsum",
+			Model:          openai.CreateImageModelDallE3,
+			N:              1,
+			Quality:        openai.CreateImageQualityHD,
+			Size:           openai.CreateImageSize1024x1024,
+			Style:          openai.CreateImageStyleVivid,
+			ResponseFormat: openai.CreateImageResponseFormatURL,
+			User:           "user",
+		},
+	)
 	checks.NoError(t, err, "CreateImage error")
 }
 
@@ -105,14 +107,16 @@ func TestImageEdit(t *testing.T) {
 		os.Remove("image.png")
 	}()
 
-	_, err = client.CreateEditImage(context.Background(), openai.ImageEditRequest{
-		Image:          origin,
-		Mask:           mask,
-		Prompt:         "There is a turtle in the pool",
-		N:              3,
-		Size:           openai.CreateImageSize1024x1024,
-		ResponseFormat: openai.CreateImageResponseFormatURL,
-	})
+	_, err = client.CreateEditImage(
+		context.Background(), openai.ImageEditRequest{
+			Image:          origin,
+			Mask:           mask,
+			Prompt:         "There is a turtle in the pool",
+			N:              3,
+			Size:           openai.CreateImageSize1024x1024,
+			ResponseFormat: openai.CreateImageResponseFormatURL,
+		},
+	)
 	checks.NoError(t, err, "CreateImage error")
 }
 
@@ -132,13 +136,15 @@ func TestImageEditWithoutMask(t *testing.T) {
 		os.Remove("image.png")
 	}()
 
-	_, err = client.CreateEditImage(context.Background(), openai.ImageEditRequest{
-		Image:          origin,
-		Prompt:         "There is a turtle in the pool",
-		N:              3,
-		Size:           openai.CreateImageSize1024x1024,
-		ResponseFormat: openai.CreateImageResponseFormatURL,
-	})
+	_, err = client.CreateEditImage(
+		context.Background(), openai.ImageEditRequest{
+			Image:          origin,
+			Prompt:         "There is a turtle in the pool",
+			N:              3,
+			Size:           openai.CreateImageSize1024x1024,
+			ResponseFormat: openai.CreateImageResponseFormatURL,
+		},
+	)
 	checks.NoError(t, err, "CreateImage error")
 }
 
@@ -189,12 +195,14 @@ func TestImageVariation(t *testing.T) {
 		os.Remove("image.png")
 	}()
 
-	_, err = client.CreateVariImage(context.Background(), openai.ImageVariRequest{
-		Image:          origin,
-		N:              3,
-		Size:           openai.CreateImageSize1024x1024,
-		ResponseFormat: openai.CreateImageResponseFormatURL,
-	})
+	_, err = client.CreateVariImage(
+		context.Background(), openai.ImageVariRequest{
+			Image:          origin,
+			N:              3,
+			Size:           openai.CreateImageSize1024x1024,
+			ResponseFormat: openai.CreateImageResponseFormatURL,
+		},
+	)
 	checks.NoError(t, err, "CreateImage error")
 }
 

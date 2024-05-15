@@ -6,7 +6,7 @@ import (
 	"reflect"
 	"testing"
 
-	"github.com/sashabaranov/go-openai"
+	"github.com/jadeGopher/go-openai"
 )
 
 func TestAPIErrorUnmarshalJSON(t *testing.T) {
@@ -90,27 +90,29 @@ func TestAPIErrorUnmarshalJSON(t *testing.T) {
 					}`,
 			hasError: false,
 			checkFunc: func(t *testing.T, apiErr openai.APIError) {
-				assertAPIErrorInnerError(t, apiErr, &openai.InnerError{
-					Code: "ResponsibleAIPolicyViolation",
-					ContentFilterResults: openai.ContentFilterResults{
-						Hate: openai.Hate{
-							Filtered: false,
-							Severity: "safe",
-						},
-						SelfHarm: openai.SelfHarm{
-							Filtered: false,
-							Severity: "safe",
-						},
-						Sexual: openai.Sexual{
-							Filtered: true,
-							Severity: "medium",
-						},
-						Violence: openai.Violence{
-							Filtered: false,
-							Severity: "safe",
+				assertAPIErrorInnerError(
+					t, apiErr, &openai.InnerError{
+						Code: "ResponsibleAIPolicyViolation",
+						ContentFilterResults: openai.ContentFilterResults{
+							Hate: openai.Hate{
+								Filtered: false,
+								Severity: "safe",
+							},
+							SelfHarm: openai.SelfHarm{
+								Filtered: false,
+								Severity: "safe",
+							},
+							Sexual: openai.Sexual{
+								Filtered: true,
+								Severity: "medium",
+							},
+							Violence: openai.Violence{
+								Filtered: false,
+								Severity: "safe",
+							},
 						},
 					},
-				})
+				)
 			},
 		},
 		{
@@ -205,16 +207,18 @@ func TestAPIErrorUnmarshalJSON(t *testing.T) {
 		},
 	}
 	for _, tc := range testCases {
-		t.Run(tc.name, func(t *testing.T) {
-			var apiErr openai.APIError
-			err := apiErr.UnmarshalJSON([]byte(tc.response))
-			if (err != nil) != tc.hasError {
-				t.Errorf("Unexpected error: %v", err)
-			}
-			if tc.checkFunc != nil {
-				tc.checkFunc(t, apiErr)
-			}
-		})
+		t.Run(
+			tc.name, func(t *testing.T) {
+				var apiErr openai.APIError
+				err := apiErr.UnmarshalJSON([]byte(tc.response))
+				if (err != nil) != tc.hasError {
+					t.Errorf("Unexpected error: %v", err)
+				}
+				if tc.checkFunc != nil {
+					tc.checkFunc(t, apiErr)
+				}
+			},
+		)
 	}
 }
 

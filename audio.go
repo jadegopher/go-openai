@@ -8,7 +8,7 @@ import (
 	"net/http"
 	"os"
 
-	utils "github.com/sashabaranov/go-openai/internal"
+	utils "github.com/jadeGopher/go-openai/internal"
 )
 
 // Whisper Defines the models provided by OpenAI to use when processing audio with OpenAI.
@@ -122,8 +122,10 @@ func (c *Client) callAudioAPI(
 	}
 
 	urlSuffix := fmt.Sprintf("/audio/%s", endpointSuffix)
-	req, err := c.newRequest(ctx, http.MethodPost, c.fullURL(urlSuffix, request.Model),
-		withBody(&formBody), withContentType(builder.FormDataContentType()))
+	req, err := c.newRequest(
+		ctx, http.MethodPost, c.fullURL(urlSuffix, request.Model),
+		withBody(&formBody), withContentType(builder.FormDataContentType()),
+	)
 	if err != nil {
 		return AudioResponse{}, err
 	}

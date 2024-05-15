@@ -6,7 +6,7 @@ import (
 	"fmt"
 	"os"
 
-	"github.com/sashabaranov/go-openai"
+	"github.com/jadeGopher/go-openai"
 )
 
 func main() {
@@ -26,10 +26,12 @@ func main() {
 	fmt.Print("> ")
 	s := bufio.NewScanner(os.Stdin)
 	for s.Scan() {
-		req.Messages = append(req.Messages, openai.ChatCompletionMessage{
-			Role:    openai.ChatMessageRoleUser,
-			Content: s.Text(),
-		})
+		req.Messages = append(
+			req.Messages, openai.ChatCompletionMessage{
+				Role:    openai.ChatMessageRoleUser,
+				Content: s.Text(),
+			},
+		)
 		resp, err := client.CreateChatCompletion(context.Background(), req)
 		if err != nil {
 			fmt.Printf("ChatCompletion error: %v\n", err)

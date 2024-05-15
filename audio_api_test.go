@@ -12,9 +12,9 @@ import (
 	"strings"
 	"testing"
 
-	"github.com/sashabaranov/go-openai"
-	"github.com/sashabaranov/go-openai/internal/test"
-	"github.com/sashabaranov/go-openai/internal/test/checks"
+	"github.com/jadeGopher/go-openai"
+	"github.com/jadeGopher/go-openai/internal/test"
+	"github.com/jadeGopher/go-openai/internal/test/checks"
 )
 
 // TestAudio Tests the transcription and translation endpoints of the API using the mocked server.
@@ -44,27 +44,31 @@ func TestAudio(t *testing.T) {
 	defer cleanup()
 
 	for _, tc := range testcases {
-		t.Run(tc.name, func(t *testing.T) {
-			path := filepath.Join(dir, "fake.mp3")
-			test.CreateTestFile(t, path)
+		t.Run(
+			tc.name, func(t *testing.T) {
+				path := filepath.Join(dir, "fake.mp3")
+				test.CreateTestFile(t, path)
 
-			req := openai.AudioRequest{
-				FilePath: path,
-				Model:    "whisper-3",
-			}
-			_, err := tc.createFn(ctx, req)
-			checks.NoError(t, err, "audio API error")
-		})
+				req := openai.AudioRequest{
+					FilePath: path,
+					Model:    "whisper-3",
+				}
+				_, err := tc.createFn(ctx, req)
+				checks.NoError(t, err, "audio API error")
+			},
+		)
 
-		t.Run(tc.name+" (with reader)", func(t *testing.T) {
-			req := openai.AudioRequest{
-				FilePath: "fake.webm",
-				Reader:   bytes.NewBuffer([]byte(`some webm binary data`)),
-				Model:    "whisper-3",
-			}
-			_, err := tc.createFn(ctx, req)
-			checks.NoError(t, err, "audio API error")
-		})
+		t.Run(
+			tc.name+" (with reader)", func(t *testing.T) {
+				req := openai.AudioRequest{
+					FilePath: "fake.webm",
+					Reader:   bytes.NewBuffer([]byte(`some webm binary data`)),
+					Model:    "whisper-3",
+				}
+				_, err := tc.createFn(ctx, req)
+				checks.NoError(t, err, "audio API error")
+			},
+		)
 	}
 }
 
@@ -94,25 +98,27 @@ func TestAudioWithOptionalArgs(t *testing.T) {
 	defer cleanup()
 
 	for _, tc := range testcases {
-		t.Run(tc.name, func(t *testing.T) {
-			path := filepath.Join(dir, "fake.mp3")
-			test.CreateTestFile(t, path)
+		t.Run(
+			tc.name, func(t *testing.T) {
+				path := filepath.Join(dir, "fake.mp3")
+				test.CreateTestFile(t, path)
 
-			req := openai.AudioRequest{
-				FilePath:    path,
-				Model:       "whisper-3",
-				Prompt:      "用简体中文",
-				Temperature: 0.5,
-				Language:    "zh",
-				Format:      openai.AudioResponseFormatSRT,
-				TimestampGranularities: []openai.TranscriptionTimestampGranularity{
-					openai.TranscriptionTimestampGranularitySegment,
-					openai.TranscriptionTimestampGranularityWord,
-				},
-			}
-			_, err := tc.createFn(ctx, req)
-			checks.NoError(t, err, "audio API error")
-		})
+				req := openai.AudioRequest{
+					FilePath:    path,
+					Model:       "whisper-3",
+					Prompt:      "用简体中文",
+					Temperature: 0.5,
+					Language:    "zh",
+					Format:      openai.AudioResponseFormatSRT,
+					TimestampGranularities: []openai.TranscriptionTimestampGranularity{
+						openai.TranscriptionTimestampGranularitySegment,
+						openai.TranscriptionTimestampGranularityWord,
+					},
+				}
+				_, err := tc.createFn(ctx, req)
+				checks.NoError(t, err, "audio API error")
+			},
+		)
 	}
 }
 

@@ -5,7 +5,7 @@ import (
 	"reflect"
 	"testing"
 
-	"github.com/sashabaranov/go-openai/jsonschema"
+	"github.com/jadeGopher/go-openai/jsonschema"
 )
 
 func TestDefinition_MarshalJSON(t *testing.T) {
@@ -171,25 +171,27 @@ func TestDefinition_MarshalJSON(t *testing.T) {
 	}
 
 	for _, tt := range tests {
-		t.Run(tt.name, func(t *testing.T) {
-			wantBytes := []byte(tt.want)
-			var want map[string]interface{}
-			err := json.Unmarshal(wantBytes, &want)
-			if err != nil {
-				t.Errorf("Failed to Unmarshal JSON: error = %v", err)
-				return
-			}
+		t.Run(
+			tt.name, func(t *testing.T) {
+				wantBytes := []byte(tt.want)
+				var want map[string]interface{}
+				err := json.Unmarshal(wantBytes, &want)
+				if err != nil {
+					t.Errorf("Failed to Unmarshal JSON: error = %v", err)
+					return
+				}
 
-			got := structToMap(t, tt.def)
-			gotPtr := structToMap(t, &tt.def)
+				got := structToMap(t, tt.def)
+				gotPtr := structToMap(t, &tt.def)
 
-			if !reflect.DeepEqual(got, want) {
-				t.Errorf("MarshalJSON() got = %v, want %v", got, want)
-			}
-			if !reflect.DeepEqual(gotPtr, want) {
-				t.Errorf("MarshalJSON() gotPtr = %v, want %v", gotPtr, want)
-			}
-		})
+				if !reflect.DeepEqual(got, want) {
+					t.Errorf("MarshalJSON() got = %v, want %v", got, want)
+				}
+				if !reflect.DeepEqual(gotPtr, want) {
+					t.Errorf("MarshalJSON() gotPtr = %v, want %v", gotPtr, want)
+				}
+			},
+		)
 	}
 }
 

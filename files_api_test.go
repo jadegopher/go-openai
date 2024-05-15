@@ -12,8 +12,8 @@ import (
 	"testing"
 	"time"
 
-	"github.com/sashabaranov/go-openai"
-	"github.com/sashabaranov/go-openai/internal/test/checks"
+	"github.com/jadeGopher/go-openai"
+	"github.com/jadeGopher/go-openai/internal/test/checks"
 )
 
 func TestFileBytesUpload(t *testing.T) {
@@ -94,10 +94,12 @@ func TestDeleteFile(t *testing.T) {
 func TestListFile(t *testing.T) {
 	client, server, teardown := setupOpenAITestServer()
 	defer teardown()
-	server.RegisterHandler("/v1/files", func(w http.ResponseWriter, _ *http.Request) {
-		resBytes, _ := json.Marshal(openai.FilesList{})
-		fmt.Fprintln(w, string(resBytes))
-	})
+	server.RegisterHandler(
+		"/v1/files", func(w http.ResponseWriter, _ *http.Request) {
+			resBytes, _ := json.Marshal(openai.FilesList{})
+			fmt.Fprintln(w, string(resBytes))
+		},
+	)
 	_, err := client.ListFiles(context.Background())
 	checks.NoError(t, err, "ListFiles error")
 }
@@ -105,10 +107,12 @@ func TestListFile(t *testing.T) {
 func TestGetFile(t *testing.T) {
 	client, server, teardown := setupOpenAITestServer()
 	defer teardown()
-	server.RegisterHandler("/v1/files/deadbeef", func(w http.ResponseWriter, _ *http.Request) {
-		resBytes, _ := json.Marshal(openai.File{})
-		fmt.Fprintln(w, string(resBytes))
-	})
+	server.RegisterHandler(
+		"/v1/files/deadbeef", func(w http.ResponseWriter, _ *http.Request) {
+			resBytes, _ := json.Marshal(openai.File{})
+			fmt.Fprintln(w, string(resBytes))
+		},
+	)
 	_, err := client.GetFile(context.Background(), "deadbeef")
 	checks.NoError(t, err, "GetFile error")
 }
@@ -120,13 +124,15 @@ func TestGetFileContent(t *testing.T) {
 `
 	client, server, teardown := setupOpenAITestServer()
 	defer teardown()
-	server.RegisterHandler("/v1/files/deadbeef/content", func(w http.ResponseWriter, r *http.Request) {
-		// edits only accepts GET requests
-		if r.Method != http.MethodGet {
-			http.Error(w, "Method not allowed", http.StatusMethodNotAllowed)
-		}
-		fmt.Fprint(w, wantRespJsonl)
-	})
+	server.RegisterHandler(
+		"/v1/files/deadbeef/content", func(w http.ResponseWriter, r *http.Request) {
+			// edits only accepts GET requests
+			if r.Method != http.MethodGet {
+				http.Error(w, "Method not allowed", http.StatusMethodNotAllowed)
+			}
+			fmt.Fprint(w, wantRespJsonl)
+		},
+	)
 
 	content, err := client.GetFileContent(context.Background(), "deadbeef")
 	checks.NoError(t, err, "GetFileContent error")
@@ -151,10 +157,12 @@ func TestGetFileContentReturnError(t *testing.T) {
 }`
 	client, server, teardown := setupOpenAITestServer()
 	defer teardown()
-	server.RegisterHandler("/v1/files/deadbeef/content", func(w http.ResponseWriter, _ *http.Request) {
-		w.WriteHeader(http.StatusBadRequest)
-		fmt.Fprint(w, wantErrorResp)
-	})
+	server.RegisterHandler(
+		"/v1/files/deadbeef/content", func(w http.ResponseWriter, _ *http.Request) {
+			w.WriteHeader(http.StatusBadRequest)
+			fmt.Fprint(w, wantErrorResp)
+		},
+	)
 
 	_, err := client.GetFileContent(context.Background(), "deadbeef")
 	if err == nil {
@@ -178,9 +186,11 @@ func TestGetFileContentReturnError(t *testing.T) {
 func TestGetFileContentReturnTimeoutError(t *testing.T) {
 	client, server, teardown := setupOpenAITestServer()
 	defer teardown()
-	server.RegisterHandler("/v1/files/deadbeef/content", func(http.ResponseWriter, *http.Request) {
-		time.Sleep(10 * time.Nanosecond)
-	})
+	server.RegisterHandler(
+		"/v1/files/deadbeef/content", func(http.ResponseWriter, *http.Request) {
+			time.Sleep(10 * time.Nanosecond)
+		},
+	)
 	ctx := context.Background()
 	ctx, cancel := context.WithTimeout(ctx, time.Nanosecond)
 	defer cancel()

@@ -9,9 +9,9 @@ import (
 	"os"
 	"testing"
 
-	"github.com/sashabaranov/go-openai"
-	"github.com/sashabaranov/go-openai/internal/test/checks"
-	"github.com/sashabaranov/go-openai/jsonschema"
+	"github.com/jadeGopher/go-openai"
+	"github.com/jadeGopher/go-openai/internal/test/checks"
+	"github.com/jadeGopher/go-openai/jsonschema"
 )
 
 func TestAPI(t *testing.T) {
@@ -77,12 +77,14 @@ func TestAPI(t *testing.T) {
 	)
 	checks.NoError(t, err, "CreateChatCompletion (with name) returned error")
 
-	stream, err := c.CreateCompletionStream(ctx, openai.CompletionRequest{
-		Prompt:    "Ex falso quodlibet",
-		Model:     openai.GPT3Ada,
-		MaxTokens: 5,
-		Stream:    true,
-	})
+	stream, err := c.CreateCompletionStream(
+		ctx, openai.CompletionRequest{
+			Prompt:    "Ex falso quodlibet",
+			Model:     openai.GPT3Ada,
+			MaxTokens: 5,
+			Stream:    true,
+		},
+	)
 	checks.NoError(t, err, "CreateCompletionStream returned error")
 	defer stream.Close()
 
@@ -112,23 +114,25 @@ func TestAPI(t *testing.T) {
 					Content: "What is the weather like in Boston?",
 				},
 			},
-			Functions: []openai.FunctionDefinition{{
-				Name: "get_current_weather",
-				Parameters: jsonschema.Definition{
-					Type: jsonschema.Object,
-					Properties: map[string]jsonschema.Definition{
-						"location": {
-							Type:        jsonschema.String,
-							Description: "The city and state, e.g. San Francisco, CA",
+			Functions: []openai.FunctionDefinition{
+				{
+					Name: "get_current_weather",
+					Parameters: jsonschema.Definition{
+						Type: jsonschema.Object,
+						Properties: map[string]jsonschema.Definition{
+							"location": {
+								Type:        jsonschema.String,
+								Description: "The city and state, e.g. San Francisco, CA",
+							},
+							"unit": {
+								Type: jsonschema.String,
+								Enum: []string{"celsius", "fahrenheit"},
+							},
 						},
-						"unit": {
-							Type: jsonschema.String,
-							Enum: []string{"celsius", "fahrenheit"},
-						},
+						Required: []string{"location"},
 					},
-					Required: []string{"location"},
 				},
-			}},
+			},
 		},
 	)
 	checks.NoError(t, err, "CreateChatCompletion (with functions) returned error")

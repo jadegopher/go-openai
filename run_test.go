@@ -2,14 +2,13 @@ package openai_test
 
 import (
 	"context"
-
-	openai "github.com/sashabaranov/go-openai"
-	"github.com/sashabaranov/go-openai/internal/test/checks"
-
 	"encoding/json"
 	"fmt"
 	"net/http"
 	"testing"
+
+	openai "github.com/jadeGopher/go-openai"
+	"github.com/jadeGopher/go-openai/internal/test/checks"
 )
 
 // TestAssistant Tests the assistant endpoint of the API using the mocked server.
@@ -30,12 +29,14 @@ func TestRun(t *testing.T) {
 		"/v1/threads/"+threadID+"/runs/"+runID+"/steps/"+stepID,
 		func(w http.ResponseWriter, r *http.Request) {
 			if r.Method == http.MethodGet {
-				resBytes, _ := json.Marshal(openai.RunStep{
-					ID:        runID,
-					Object:    "run",
-					CreatedAt: 1234567890,
-					Status:    openai.RunStepStatusCompleted,
-				})
+				resBytes, _ := json.Marshal(
+					openai.RunStep{
+						ID:        runID,
+						Object:    "run",
+						CreatedAt: 1234567890,
+						Status:    openai.RunStepStatusCompleted,
+					},
+				)
 				fmt.Fprintln(w, string(resBytes))
 			}
 		},
@@ -45,16 +46,18 @@ func TestRun(t *testing.T) {
 		"/v1/threads/"+threadID+"/runs/"+runID+"/steps",
 		func(w http.ResponseWriter, r *http.Request) {
 			if r.Method == http.MethodGet {
-				resBytes, _ := json.Marshal(openai.RunStepList{
-					RunSteps: []openai.RunStep{
-						{
-							ID:        runID,
-							Object:    "run",
-							CreatedAt: 1234567890,
-							Status:    openai.RunStepStatusCompleted,
+				resBytes, _ := json.Marshal(
+					openai.RunStepList{
+						RunSteps: []openai.RunStep{
+							{
+								ID:        runID,
+								Object:    "run",
+								CreatedAt: 1234567890,
+								Status:    openai.RunStepStatusCompleted,
+							},
 						},
 					},
-				})
+				)
 				fmt.Fprintln(w, string(resBytes))
 			}
 		},
@@ -64,12 +67,14 @@ func TestRun(t *testing.T) {
 		"/v1/threads/"+threadID+"/runs/"+runID+"/cancel",
 		func(w http.ResponseWriter, r *http.Request) {
 			if r.Method == http.MethodPost {
-				resBytes, _ := json.Marshal(openai.Run{
-					ID:        runID,
-					Object:    "run",
-					CreatedAt: 1234567890,
-					Status:    openai.RunStatusCancelling,
-				})
+				resBytes, _ := json.Marshal(
+					openai.Run{
+						ID:        runID,
+						Object:    "run",
+						CreatedAt: 1234567890,
+						Status:    openai.RunStatusCancelling,
+					},
+				)
 				fmt.Fprintln(w, string(resBytes))
 			}
 		},
@@ -79,12 +84,14 @@ func TestRun(t *testing.T) {
 		"/v1/threads/"+threadID+"/runs/"+runID+"/submit_tool_outputs",
 		func(w http.ResponseWriter, r *http.Request) {
 			if r.Method == http.MethodPost {
-				resBytes, _ := json.Marshal(openai.Run{
-					ID:        runID,
-					Object:    "run",
-					CreatedAt: 1234567890,
-					Status:    openai.RunStatusCancelling,
-				})
+				resBytes, _ := json.Marshal(
+					openai.Run{
+						ID:        runID,
+						Object:    "run",
+						CreatedAt: 1234567890,
+						Status:    openai.RunStatusCancelling,
+					},
+				)
 				fmt.Fprintln(w, string(resBytes))
 			}
 		},
@@ -94,25 +101,29 @@ func TestRun(t *testing.T) {
 		"/v1/threads/"+threadID+"/runs/"+runID,
 		func(w http.ResponseWriter, r *http.Request) {
 			if r.Method == http.MethodGet {
-				resBytes, _ := json.Marshal(openai.Run{
-					ID:        runID,
-					Object:    "run",
-					CreatedAt: 1234567890,
-					Status:    openai.RunStatusQueued,
-				})
+				resBytes, _ := json.Marshal(
+					openai.Run{
+						ID:        runID,
+						Object:    "run",
+						CreatedAt: 1234567890,
+						Status:    openai.RunStatusQueued,
+					},
+				)
 				fmt.Fprintln(w, string(resBytes))
 			} else if r.Method == http.MethodPost {
 				var request openai.RunModifyRequest
 				err := json.NewDecoder(r.Body).Decode(&request)
 				checks.NoError(t, err, "Decode error")
 
-				resBytes, _ := json.Marshal(openai.Run{
-					ID:        runID,
-					Object:    "run",
-					CreatedAt: 1234567890,
-					Status:    openai.RunStatusQueued,
-					Metadata:  request.Metadata,
-				})
+				resBytes, _ := json.Marshal(
+					openai.Run{
+						ID:        runID,
+						Object:    "run",
+						CreatedAt: 1234567890,
+						Status:    openai.RunStatusQueued,
+						Metadata:  request.Metadata,
+					},
+				)
 				fmt.Fprintln(w, string(resBytes))
 			}
 		},
@@ -126,24 +137,28 @@ func TestRun(t *testing.T) {
 				err := json.NewDecoder(r.Body).Decode(&request)
 				checks.NoError(t, err, "Decode error")
 
-				resBytes, _ := json.Marshal(openai.Run{
-					ID:        runID,
-					Object:    "run",
-					CreatedAt: 1234567890,
-					Status:    openai.RunStatusQueued,
-				})
+				resBytes, _ := json.Marshal(
+					openai.Run{
+						ID:        runID,
+						Object:    "run",
+						CreatedAt: 1234567890,
+						Status:    openai.RunStatusQueued,
+					},
+				)
 				fmt.Fprintln(w, string(resBytes))
 			} else if r.Method == http.MethodGet {
-				resBytes, _ := json.Marshal(openai.RunList{
-					Runs: []openai.Run{
-						{
-							ID:        runID,
-							Object:    "run",
-							CreatedAt: 1234567890,
-							Status:    openai.RunStatusQueued,
+				resBytes, _ := json.Marshal(
+					openai.RunList{
+						Runs: []openai.Run{
+							{
+								ID:        runID,
+								Object:    "run",
+								CreatedAt: 1234567890,
+								Status:    openai.RunStatusQueued,
+							},
 						},
 					},
-				})
+				)
 				fmt.Fprintln(w, string(resBytes))
 			}
 		},
@@ -157,12 +172,14 @@ func TestRun(t *testing.T) {
 				err := json.NewDecoder(r.Body).Decode(&request)
 				checks.NoError(t, err, "Decode error")
 
-				resBytes, _ := json.Marshal(openai.Run{
-					ID:        runID,
-					Object:    "run",
-					CreatedAt: 1234567890,
-					Status:    openai.RunStatusQueued,
-				})
+				resBytes, _ := json.Marshal(
+					openai.Run{
+						ID:        runID,
+						Object:    "run",
+						CreatedAt: 1234567890,
+						Status:    openai.RunStatusQueued,
+					},
+				)
 				fmt.Fprintln(w, string(resBytes))
 			}
 		},
@@ -170,19 +187,23 @@ func TestRun(t *testing.T) {
 
 	ctx := context.Background()
 
-	_, err := client.CreateRun(ctx, threadID, openai.RunRequest{
-		AssistantID: assistantID,
-	})
+	_, err := client.CreateRun(
+		ctx, threadID, openai.RunRequest{
+			AssistantID: assistantID,
+		},
+	)
 	checks.NoError(t, err, "CreateRun error")
 
 	_, err = client.RetrieveRun(ctx, threadID, runID)
 	checks.NoError(t, err, "RetrieveRun error")
 
-	_, err = client.ModifyRun(ctx, threadID, runID, openai.RunModifyRequest{
-		Metadata: map[string]any{
-			"key": "value",
+	_, err = client.ModifyRun(
+		ctx, threadID, runID, openai.RunModifyRequest{
+			Metadata: map[string]any{
+				"key": "value",
+			},
 		},
-	})
+	)
 	checks.NoError(t, err, "ModifyRun error")
 
 	_, err = client.ListRuns(
@@ -197,26 +218,30 @@ func TestRun(t *testing.T) {
 	)
 	checks.NoError(t, err, "ListRuns error")
 
-	_, err = client.SubmitToolOutputs(ctx, threadID, runID,
-		openai.SubmitToolOutputsRequest{})
+	_, err = client.SubmitToolOutputs(
+		ctx, threadID, runID,
+		openai.SubmitToolOutputsRequest{},
+	)
 	checks.NoError(t, err, "SubmitToolOutputs error")
 
 	_, err = client.CancelRun(ctx, threadID, runID)
 	checks.NoError(t, err, "CancelRun error")
 
-	_, err = client.CreateThreadAndRun(ctx, openai.CreateThreadAndRunRequest{
-		RunRequest: openai.RunRequest{
-			AssistantID: assistantID,
-		},
-		Thread: openai.ThreadRequest{
-			Messages: []openai.ThreadMessage{
-				{
-					Role:    openai.ThreadMessageRoleUser,
-					Content: "Hello, World!",
+	_, err = client.CreateThreadAndRun(
+		ctx, openai.CreateThreadAndRunRequest{
+			RunRequest: openai.RunRequest{
+				AssistantID: assistantID,
+			},
+			Thread: openai.ThreadRequest{
+				Messages: []openai.ThreadMessage{
+					{
+						Role:    openai.ThreadMessageRoleUser,
+						Content: "Hello, World!",
+					},
 				},
 			},
 		},
-	})
+	)
 	checks.NoError(t, err, "CreateThreadAndRun error")
 
 	_, err = client.RetrieveRunStep(ctx, threadID, runID, stepID)

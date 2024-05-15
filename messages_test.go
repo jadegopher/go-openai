@@ -7,8 +7,8 @@ import (
 	"net/http"
 	"testing"
 
-	"github.com/sashabaranov/go-openai"
-	"github.com/sashabaranov/go-openai/internal/test/checks"
+	"github.com/jadeGopher/go-openai"
+	"github.com/jadeGopher/go-openai/internal/test/checks"
 )
 
 var emptyStr = ""
@@ -33,7 +33,8 @@ func TestMessages(t *testing.T) {
 						Object:    "thread.message.file",
 						CreatedAt: 1699061776,
 						MessageID: messageID,
-					})
+					},
+				)
 				fmt.Fprintln(w, string(resBytes))
 			default:
 				t.Fatalf("unsupported messages http method: %s", r.Method)
@@ -47,12 +48,17 @@ func TestMessages(t *testing.T) {
 			switch r.Method {
 			case http.MethodGet:
 				resBytes, _ := json.Marshal(
-					openai.MessageFilesList{MessageFiles: []openai.MessageFile{{
-						ID:        fileID,
-						Object:    "thread.message.file",
-						CreatedAt: 0,
-						MessageID: messageID,
-					}}})
+					openai.MessageFilesList{
+						MessageFiles: []openai.MessageFile{
+							{
+								ID:        fileID,
+								Object:    "thread.message.file",
+								CreatedAt: 0,
+								MessageID: messageID,
+							},
+						},
+					},
+				)
 				fmt.Fprintln(w, string(resBytes))
 			default:
 				t.Fatalf("unsupported messages http method: %s", r.Method)
@@ -80,18 +86,21 @@ func TestMessages(t *testing.T) {
 						CreatedAt: 1234567890,
 						ThreadID:  threadID,
 						Role:      "user",
-						Content: []openai.MessageContent{{
-							Type: "text",
-							Text: &openai.MessageText{
-								Value:       "How does AI work?",
-								Annotations: nil,
+						Content: []openai.MessageContent{
+							{
+								Type: "text",
+								Text: &openai.MessageText{
+									Value:       "How does AI work?",
+									Annotations: nil,
+								},
 							},
-						}},
+						},
 						FileIds:     nil,
 						AssistantID: &emptyStr,
 						RunID:       &emptyStr,
 						Metadata:    payload,
-					})
+					},
+				)
 
 				fmt.Fprintln(w, string(resBytes))
 			case http.MethodGet:
@@ -102,18 +111,21 @@ func TestMessages(t *testing.T) {
 						CreatedAt: 1234567890,
 						ThreadID:  threadID,
 						Role:      "user",
-						Content: []openai.MessageContent{{
-							Type: "text",
-							Text: &openai.MessageText{
-								Value:       "How does AI work?",
-								Annotations: nil,
+						Content: []openai.MessageContent{
+							{
+								Type: "text",
+								Text: &openai.MessageText{
+									Value:       "How does AI work?",
+									Annotations: nil,
+								},
 							},
-						}},
+						},
 						FileIds:     nil,
 						AssistantID: &emptyStr,
 						RunID:       &emptyStr,
 						Metadata:    nil,
-					})
+					},
+				)
 				fmt.Fprintln(w, string(resBytes))
 			default:
 				t.Fatalf("unsupported messages http method: %s", r.Method)
@@ -126,50 +138,60 @@ func TestMessages(t *testing.T) {
 		func(w http.ResponseWriter, r *http.Request) {
 			switch r.Method {
 			case http.MethodPost:
-				resBytes, _ := json.Marshal(openai.Message{
-					ID:        messageID,
-					Object:    "thread.message",
-					CreatedAt: 1234567890,
-					ThreadID:  threadID,
-					Role:      "user",
-					Content: []openai.MessageContent{{
-						Type: "text",
-						Text: &openai.MessageText{
-							Value:       "How does AI work?",
-							Annotations: nil,
-						},
-					}},
-					FileIds:     nil,
-					AssistantID: &emptyStr,
-					RunID:       &emptyStr,
-					Metadata:    nil,
-				})
-				fmt.Fprintln(w, string(resBytes))
-			case http.MethodGet:
-				resBytes, _ := json.Marshal(openai.MessagesList{
-					Object: "list",
-					Messages: []openai.Message{{
+				resBytes, _ := json.Marshal(
+					openai.Message{
 						ID:        messageID,
 						Object:    "thread.message",
 						CreatedAt: 1234567890,
 						ThreadID:  threadID,
 						Role:      "user",
-						Content: []openai.MessageContent{{
-							Type: "text",
-							Text: &openai.MessageText{
-								Value:       "How does AI work?",
-								Annotations: nil,
+						Content: []openai.MessageContent{
+							{
+								Type: "text",
+								Text: &openai.MessageText{
+									Value:       "How does AI work?",
+									Annotations: nil,
+								},
 							},
-						}},
+						},
 						FileIds:     nil,
 						AssistantID: &emptyStr,
 						RunID:       &emptyStr,
 						Metadata:    nil,
-					}},
-					FirstID: &messageID,
-					LastID:  &messageID,
-					HasMore: false,
-				})
+					},
+				)
+				fmt.Fprintln(w, string(resBytes))
+			case http.MethodGet:
+				resBytes, _ := json.Marshal(
+					openai.MessagesList{
+						Object: "list",
+						Messages: []openai.Message{
+							{
+								ID:        messageID,
+								Object:    "thread.message",
+								CreatedAt: 1234567890,
+								ThreadID:  threadID,
+								Role:      "user",
+								Content: []openai.MessageContent{
+									{
+										Type: "text",
+										Text: &openai.MessageText{
+											Value:       "How does AI work?",
+											Annotations: nil,
+										},
+									},
+								},
+								FileIds:     nil,
+								AssistantID: &emptyStr,
+								RunID:       &emptyStr,
+								Metadata:    nil,
+							},
+						},
+						FirstID: &messageID,
+						LastID:  &messageID,
+						HasMore: false,
+					},
+				)
 				fmt.Fprintln(w, string(resBytes))
 			default:
 				t.Fatalf("unsupported messages http method: %s", r.Method)
@@ -181,12 +203,14 @@ func TestMessages(t *testing.T) {
 
 	// static assertion of return type
 	var msg openai.Message
-	msg, err := client.CreateMessage(ctx, threadID, openai.MessageRequest{
-		Role:     "user",
-		Content:  "How does AI work?",
-		FileIds:  nil,
-		Metadata: nil,
-	})
+	msg, err := client.CreateMessage(
+		ctx, threadID, openai.MessageRequest{
+			Role:     "user",
+			Content:  "How does AI work?",
+			FileIds:  nil,
+			Metadata: nil,
+		},
+	)
 	checks.NoError(t, err, "CreateMessage error")
 	if msg.ID != messageID {
 		t.Fatalf("unexpected message id: '%s'", msg.ID)
@@ -216,10 +240,12 @@ func TestMessages(t *testing.T) {
 		t.Fatalf("unexpected message id: '%s'", msg.ID)
 	}
 
-	msg, err = client.ModifyMessage(ctx, threadID, messageID,
+	msg, err = client.ModifyMessage(
+		ctx, threadID, messageID,
 		map[string]string{
 			"foo": "bar",
-		})
+		},
+	)
 	checks.NoError(t, err, "ModifyMessage error")
 	if msg.Metadata["foo"] != "bar" {
 		t.Fatalf("expected message metadata to get modified")
