@@ -11,9 +11,9 @@ import (
 	"path/filepath"
 	"testing"
 
-	"github.com/jadeGopher/go-openai"
-	"github.com/jadeGopher/go-openai/internal/test"
-	"github.com/jadeGopher/go-openai/internal/test/checks"
+	"github.com/jadegopher/go-openai"
+	"github.com/jadegopher/go-openai/internal/test"
+	"github.com/jadegopher/go-openai/internal/test/checks"
 )
 
 func TestSpeechIntegration(t *testing.T) {

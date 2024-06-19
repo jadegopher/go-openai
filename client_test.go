@@ -10,8 +10,8 @@ import (
 	"reflect"
 	"testing"
 
-	"github.com/jadeGopher/go-openai/internal/test"
-	"github.com/jadeGopher/go-openai/internal/test/checks"
+	"github.com/jadegopher/go-openai/internal/test"
+	"github.com/jadegopher/go-openai/internal/test/checks"
 )
 
 var errTestRequestBuilderFailed = errors.New("test request builder failed")

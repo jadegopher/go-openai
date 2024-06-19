@@ -5,7 +5,7 @@ import (
 	"fmt"
 	"os"
 
-	"github.com/jadeGopher/go-openai"
+	"github.com/jadegopher/go-openai"
 )
 
 func main() {

@@ -1,7 +1,7 @@
 package test
 
 import (
-	"github.com/jadeGopher/go-openai/internal/test/checks"
+	"github.com/jadegopher/go-openai/internal/test/checks"
 
 	"net/http"
 	"os"

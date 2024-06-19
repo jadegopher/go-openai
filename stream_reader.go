@@ -7,7 +7,7 @@ import (
 	"io"
 	"net/http"
 
-	utils "github.com/jadeGopher/go-openai/internal"
+	utils "github.com/jadegopher/go-openai/internal"
 )
 
 var (
