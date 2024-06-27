@@ -522,6 +522,23 @@ func TestClientReturnsRequestBuilderErrors(t *testing.T) {
 				return client.CreateSpeech(ctx, CreateSpeechRequest{Model: TTSModel1, Voice: VoiceAlloy})
 			},
 		},
+		{
+			"CreateBatch", func() (any, error) {
+				return client.CreateBatch(ctx, CreateBatchRequest{})
+			},
+		},
+		{
+			"CreateBatchWithUploadFile", func() (any, error) {
+				return client.CreateBatchWithUploadFile(ctx, CreateBatchWithUploadFileRequest{})
+			},
+		},
+		{
+			"RetrieveBatch", func() (any, error) {
+				return client.RetrieveBatch(ctx, "")
+			},
+		},
+		{"CancelBatch", func() (any, error) { return client.CancelBatch(ctx, "") }},
+		{"ListBatch", func() (any, error) { return client.ListBatch(ctx, nil, nil) }},
 	}
 
 	for _, testCase := range testCases {
