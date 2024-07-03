@@ -111,6 +111,9 @@ type RunRequest struct {
 	ToolChoice any `json:"tool_choice,omitempty"`
 	// This can be either a string or a ResponseFormat object.
 	ResponseFormat any `json:"response_format,omitempty"`
+
+	// Whether to enable parallel function calling during tool use.
+	ParallelToolCalls bool `json:"parallel_tool_calls"`
 }
 
 // ThreadTruncationStrategy defines the truncation strategy to use for the thread.
@@ -246,7 +249,8 @@ func (c *Client) CreateRun(
 		http.MethodPost,
 		c.fullURL(urlSuffix),
 		withBody(request),
-		withBetaAssistantVersion(c.config.AssistantVersion))
+		withBetaAssistantVersion(c.config.AssistantVersion),
+	)
 	if err != nil {
 		return
 	}
@@ -266,7 +270,8 @@ func (c *Client) RetrieveRun(
 		ctx,
 		http.MethodGet,
 		c.fullURL(urlSuffix),
-		withBetaAssistantVersion(c.config.AssistantVersion))
+		withBetaAssistantVersion(c.config.AssistantVersion),
+	)
 	if err != nil {
 		return
 	}
@@ -288,7 +293,8 @@ func (c *Client) ModifyRun(
 		http.MethodPost,
 		c.fullURL(urlSuffix),
 		withBody(request),
-		withBetaAssistantVersion(c.config.AssistantVersion))
+		withBetaAssistantVersion(c.config.AssistantVersion),
+	)
 	if err != nil {
 		return
 	}
@@ -327,7 +333,8 @@ func (c *Client) ListRuns(
 		ctx,
 		http.MethodGet,
 		c.fullURL(urlSuffix),
-		withBetaAssistantVersion(c.config.AssistantVersion))
+		withBetaAssistantVersion(c.config.AssistantVersion),
+	)
 	if err != nil {
 		return
 	}
@@ -341,14 +348,16 @@ func (c *Client) SubmitToolOutputs(
 	ctx context.Context,
 	threadID string,
 	runID string,
-	request SubmitToolOutputsRequest) (response Run, err error) {
+	request SubmitToolOutputsRequest,
+) (response Run, err error) {
 	urlSuffix := fmt.Sprintf("/threads/%s/runs/%s/submit_tool_outputs", threadID, runID)
 	req, err := c.newRequest(
 		ctx,
 		http.MethodPost,
 		c.fullURL(urlSuffix),
 		withBody(request),
-		withBetaAssistantVersion(c.config.AssistantVersion))
+		withBetaAssistantVersion(c.config.AssistantVersion),
+	)
 	if err != nil {
 		return
 	}
@@ -391,13 +400,15 @@ func (c *Client) SubmitToolOutputsStream(
 func (c *Client) CancelRun(
 	ctx context.Context,
 	threadID string,
-	runID string) (response Run, err error) {
+	runID string,
+) (response Run, err error) {
 	urlSuffix := fmt.Sprintf("/threads/%s/runs/%s/cancel", threadID, runID)
 	req, err := c.newRequest(
 		ctx,
 		http.MethodPost,
 		c.fullURL(urlSuffix),
-		withBetaAssistantVersion(c.config.AssistantVersion))
+		withBetaAssistantVersion(c.config.AssistantVersion),
+	)
 	if err != nil {
 		return
 	}
@@ -409,14 +420,16 @@ func (c *Client) CancelRun(
 // CreateThreadAndRun submits tool outputs.
 func (c *Client) CreateThreadAndRun(
 	ctx context.Context,
-	request CreateThreadAndRunRequest) (response Run, err error) {
+	request CreateThreadAndRunRequest,
+) (response Run, err error) {
 	urlSuffix := "/threads/runs"
 	req, err := c.newRequest(
 		ctx,
 		http.MethodPost,
 		c.fullURL(urlSuffix),
 		withBody(request),
-		withBetaAssistantVersion(c.config.AssistantVersion))
+		withBetaAssistantVersion(c.config.AssistantVersion),
+	)
 	if err != nil {
 		return
 	}
@@ -474,7 +487,8 @@ type AssistantStream struct {
 
 func (c *Client) CreateThreadAndRunStream(
 	ctx context.Context,
-	request CreateThreadAndRunRequest) (stream *StreamerV2, err error) {
+	request CreateThreadAndRunRequest,
+) (stream *StreamerV2, err error) {
 	type createThreadAndStreamRequest struct {
 		CreateThreadAndRunRequest
 		Stream bool `json:"stream"`
@@ -503,7 +517,8 @@ func (c *Client) CreateThreadAndRunStream(
 func (c *Client) CreateRunStream(
 	ctx context.Context,
 	threadID string,
-	request RunRequest) (stream *StreamerV2, err error) {
+	request RunRequest,
+) (stream *StreamerV2, err error) {
 	urlSuffix := fmt.Sprintf("/threads/%s/runs", threadID)
 
 	r := RunRequestStreaming{
@@ -537,7 +552,8 @@ func (c *Client) RetrieveRunStep(
 		ctx,
 		http.MethodGet,
 		c.fullURL(urlSuffix),
-		withBetaAssistantVersion(c.config.AssistantVersion))
+		withBetaAssistantVersion(c.config.AssistantVersion),
+	)
 	if err != nil {
 		return
 	}
@@ -577,7 +593,8 @@ func (c *Client) ListRunSteps(
 		ctx,
 		http.MethodGet,
 		c.fullURL(urlSuffix),
-		withBetaAssistantVersion(c.config.AssistantVersion))
+		withBetaAssistantVersion(c.config.AssistantVersion),
+	)
 	if err != nil {
 		return
 	}
